@@ -1,9 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
-public abstract class Unit : MonoBehaviour, IHealable, IPositioned
+using Game.Team.Player;
+public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 {
     [Header("Atributos de la Unidad")]
-
     [field: SerializeField] public Vector2Int position { get; set; } = Vector2Int.zero;
     [field: SerializeField] public int movementRange { get; set; } = 3;
     public string id { get; set; } = "";
@@ -26,7 +26,10 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned
     [field: SerializeField] private bool isSelected = false;
     private List<Vector2Int> validMoves = new List<Vector2Int>();
 
-    private bool isCursorHidden = false;
+    private Vector2Int currentTargetGridPos; // Posición actual del cursor/destino en la cuadrícula
+    private Vector3 lastMouseScreenPosition; // Para detectar movimiento físico del ratón
+    private bool usingKeyboard = false;
+    private Vector2Int lastRenderedTarget = new Vector2Int(-999, -999);
 
     public Unit() => id = "";
 
@@ -61,10 +64,9 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned
 
         if (isSelected)
         {
-
+            ProcessInputMode();
             UpdatePathPreview();
             HandleMovementInput();
-            ShowCursor();
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 DeselectUnit();
@@ -87,7 +89,12 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned
         isSelected = true;
         CalculateValidMoves();
         ShowMovementRange();
-        lastMouseGridPos = new Vector2Int(-999, -999);
+
+        currentTargetGridPos = position;
+        lastMouseScreenPosition = Input.mousePosition;
+        usingKeyboard = false;
+        ShowCursor();
+
         Debug.Log("Unidad seleccionada. Esperando destino...");
     }
 
@@ -96,30 +103,60 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned
         isSelected = false;
         HideMovementRange();
         ClearPathVisuals();
+        ShowCursor();
         Debug.Log($"Unidad {gameObject.name} deseleccionada.");
     }
 
+    private void ProcessInputMode()
+    {
+        float mouseDistance = Vector3.Distance(Input.mousePosition, lastMouseScreenPosition);
+        if (mouseDistance > 0.5f)
+        {
+            if (usingKeyboard)
+            {
+                usingKeyboard = false;
+                ShowCursor();
+            }
+            lastMouseScreenPosition = Input.mousePosition;
+        }
+
+        Vector2Int keyDirection = Vector2Int.zero;
+        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) keyDirection.y += 1;
+        if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) keyDirection.y -= 1;
+        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) keyDirection.x -= 1;
+        if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)) keyDirection.x += 1;
+
+        if (keyDirection != Vector2Int.zero)
+        {
+            if (!usingKeyboard)
+            {
+                usingKeyboard = true;
+                HideCursor();
+            }
+            currentTargetGridPos += keyDirection;
+        }
+        else if (!usingKeyboard)
+        {
+            Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            currentTargetGridPos = new Vector2Int(Mathf.RoundToInt(mouseWorldPos.x), Mathf.RoundToInt(mouseWorldPos.y));
+        }
+    }
+
+
     private void HandleMovementInput()
     {
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1) || (usingKeyboard && Input.GetKeyDown(KeyCode.KeypadEnter)))
         {
             Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector2Int targetGridPos = new Vector2Int(Mathf.RoundToInt(mousePos.x), Mathf.RoundToInt(mousePos.y));
 
             MoveTo(targetGridPos);
         }
-
-        HideCursor();
-
-
     }
 
     private void MoveTo(Vector2Int targetPos)
     {
         Vector2Int finalDestination = GetClosestValidPosition(targetPos);
-
-        // Actualizar posición lógica
-        //gridPosition = finalDestination;
         position = finalDestination;
 
         UpdateVisualPosition();
@@ -212,39 +249,15 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned
 
     private void UpdatePathPreview()
     {
-        Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector2Int currentMouseGridPos = new Vector2Int(Mathf.RoundToInt(mousePos.x), Mathf.RoundToInt(mousePos.y));
-
-        // Solo recalcula si el ratón se movió de casilla
-        if (currentMouseGridPos != lastMouseGridPos || Input.anyKey)
+        // Solo instanciar o actualizar visuales si la posición objetivo cambió
+        if (currentTargetGridPos != lastRenderedTarget)
         {
-            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
-            {
-                lastMouseGridPos += new Vector2Int(0, 1);
-            }
-            if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
-            {
-                lastMouseGridPos += new Vector2Int(-1, 0);
-            }
-            if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                lastMouseGridPos += new Vector2Int(1, 0);
-            }
-            if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
-            {
-                lastMouseGridPos += new Vector2Int(0, -1);
-            }
-            lastMouseGridPos = currentMouseGridPos;
+            lastRenderedTarget = currentTargetGridPos;
             ClearPathVisuals();
 
-            Vector2Int validTarget = GetClosestValidPosition(currentMouseGridPos);
+            currentTargetGridPos = GetClosestValidPosition(currentTargetGridPos);
+            List<Vector2Int> path = FindPath(position, currentTargetGridPos);
 
-            // Si apuntamos a nosotros mismos, no mostramos camino rojo
-            //if (validTarget == position) return;
-
-            List<Vector2Int> path = FindPath(position, validTarget);
-
-            // Dibujar el camino instanciando los prefabs rojos
             foreach (Vector2Int pathNode in path)
             {
                 if (pathHighlightPrefab != null)
@@ -296,15 +309,11 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned
     private void HideCursor()
     {
         Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.None; // Cambia a Locked si prefieres centrarlo
-        isCursorHidden = true;
     }
 
     private void ShowCursor()
     {
         Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
-        isCursorHidden = false;
     }
 
 }
