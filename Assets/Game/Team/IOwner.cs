@@ -2,7 +2,7 @@
 {
 	public interface IOwner
 	{
-		string Id { get; }
-		string Name { get; }
+		public string id { get; }
+		public string name { get; }
 	}
 }

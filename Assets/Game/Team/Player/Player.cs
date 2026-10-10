@@ -3,18 +3,15 @@
 namespace Game.Team.Player
 {
 	[System.Serializable]
-	public class Player: IOwner
+	public class Player: MonoBehaviour, IOwner
 	{
-		[SerializeField] private string id;
-		[SerializeField] private string name;
+		[field: SerializeField] public string id { get; set; }
+		[field: SerializeField] public string nickName { get; set; }
 
-		public string Id => id;
-		public string Name => name;
-
-		public Player(string id, string name)
+        public Player(string id, string name)
 		{
 			this.id = id;
-			this.name = name;
+			this.nickName = name;
 		}
 	}
 }

@@ -6,30 +6,31 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     [Header("Atributos de la Unidad")]
     [field: SerializeField] public Vector2Int position { get; set; } = Vector2Int.zero;
     [field: SerializeField] public int movementRange { get; set; } = 3;
-    public string id { get; set; } = "";
+    [field: SerializeField]  public string id { get; set; } = "";
     [Header("Visuales del Pathing")]
     [SerializeField] private GameObject rangeHighlightPrefab;
     [SerializeField] private GameObject pathHighlightPrefab;
-    //public  Player? owner {get; set;}
-    public int fatigue { get; set; }
+    [field: SerializeField]  public  Player owner {get; set;}
+    [field :SerializeField]public int fatigue { get; set; }
     public int currentHP { get; set; } = 10;
     public int maxHP { get; set; } = 10;
 
+    [field: SerializeField] public bool isMyTurn { get; private set; } = false;
+
     private List<GameObject> activeRangeVisuals = new List<GameObject>();
     private List<GameObject> activePathVisuals = new List<GameObject>();
-    private Vector2Int lastMouseGridPos;
 
-    //public UnitStatus status {get; set;}
-    //public IMovementProfile movement {get; set;}
-    //public List<IWeapon> Weapons {get; set;}
     [Header("Estado de Selección")]
     [field: SerializeField] private bool isSelected = false;
+    public bool hasActedThisRound = false;
     private List<Vector2Int> validMoves = new List<Vector2Int>();
 
     private Vector2Int currentTargetGridPos; // Posición actual del cursor/destino en la cuadrícula
     private Vector3 lastMouseScreenPosition; // Para detectar movimiento físico del ratón
     private bool usingKeyboard = false;
     private Vector2Int lastRenderedTarget = new Vector2Int(-999, -999);
+
+    private bool justTurnedOn = false;
 
     public Unit() => id = "";
 
@@ -40,7 +41,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 
     public void TakeDamage(int damage) { this.currentHP -= damage; } //death(); }
     public void Heal(int heal) { this.currentHP = this.currentHP + heal > this.maxHP ? this.maxHP : this.currentHP + heal; }
-    public void ReduceFatigue(int amount) { this.fatigue -= amount; }
+    public void ReduceFatigue(int amount) { this.fatigue -= amount; if (this.fatigue == 0) { TurnManager.Instance.unitReady(); } }
 
 
 
@@ -56,14 +57,19 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     protected virtual void Start()
     {
         UpdateVisualPosition();
+        if (TurnManager.Instance != null) TurnManager.Instance.RegisterUnit(this);
     }
 
     protected virtual void Update()
     {
-
-
-        if (isSelected)
+        if (isSelected && isMyTurn)
         {
+            if (justTurnedOn)
+            {
+                justTurnedOn = false;
+                return;
+            }
+
             ProcessInputMode();
             UpdatePathPreview();
             HandleMovementInput();
@@ -75,9 +81,25 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 
     }
 
+    public void StartTurn()
+    {
+        isMyTurn = true;
+        justTurnedOn = true;
+        // Opcional: Auto-seleccionar la unidad y centrar la cámara cuando inicie su turno
+        SelectUnit();
+    }
+
+    public void EndTurn(int cost)
+    {
+        isMyTurn = false;
+        DeselectUnit();
+        // Notificar al gestor que terminamos y cuánta fatiga generó la acción
+        TurnManager.Instance.CompleteUnitAction(this, cost);
+    }
+
     private void OnMouseDown()
     {
-        if (!isSelected)
+        if (!isSelected && isMyTurn)
         {
             SelectUnit();
         }
@@ -156,12 +178,18 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 
     private void MoveTo(Vector2Int targetPos)
     {
+        if (!isMyTurn) return;
         Vector2Int finalDestination = GetClosestValidPosition(targetPos);
         position = finalDestination;
+        int distanceMoved = Mathf.RoundToInt(Vector2.Distance(position, finalDestination));
+        int totalFatigueCost = 10 + (distanceMoved * 5);
+
 
         UpdateVisualPosition();
         DeselectUnit();
         Debug.Log($"Unidad movida a {position}");
+
+        EndTurn(totalFatigueCost);
     }
 
 
@@ -201,6 +229,11 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
         }
 
         return bestTile;
+    }
+
+    public void AddFatigue(int amount)
+    {
+        this.fatigue += amount;
     }
 
 

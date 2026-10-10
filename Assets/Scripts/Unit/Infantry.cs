@@ -6,11 +6,6 @@ public class Infantry : Unit
     protected override void Start()
     {
         base.Start(); // Ejecuta la inicialización visual de la clase Unit
-
-        // Atributos específicos de Infantería
-        maxHP = 10;
-        currentHP = maxHP;
-        movementRange = 3;
     }
 
 }

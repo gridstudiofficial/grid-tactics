@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using Game.Team.Player;
 
 public class TurnManager : MonoBehaviour
 {
@@ -8,7 +9,16 @@ public class TurnManager : MonoBehaviour
 
     [Header("Cola de Unidades")]
     public List<Unit> allUnits = new List<Unit>();
+    public List<Unit> activeUnits = new List<Unit>();
+    public bool anyUnitReady = false;
+
+
+    [Header("Estado Actual de Turnos")]
+    public Player activePlayer;
     public Unit currentActiveUnit;
+
+    public System.Action<Unit> OnActiveUnitChanged;
+    public System.Action<List<Unit>> OnQueueUpdated;
 
     private void Awake()
     {
@@ -20,7 +30,7 @@ public class TurnManager : MonoBehaviour
     {
         // Ejemplo: Empezar el combate al cargar la escena
         // En tu juego real, llamarás a esto tras colocar las fichas
-        CalculateNextTurn();
+        //StartNextBatchOrReduce();
     }
 
     public void RegisterUnit(Unit unit)
@@ -29,34 +39,79 @@ public class TurnManager : MonoBehaviour
             allUnits.Add(unit);
     }
 
-    public void CalculateNextTurn()
+    public void StartNextBatchOrReduce()
     {
-        if (allUnits.Count == 0) return;
+        activeUnits  = allUnits.Where(u => u.fatigue <= 0 && !u.hasActedThisRound).ToList();
 
-        // 1. Reducir fatiga hasta que al menos una unidad llegue a 0
-        while (!allUnits.Any(u => u.fatigue <= 0))
+        if (activeUnits.Count == 0)
         {
+            anyUnitReady = false;
+            // Nadie tiene fatiga 0. Reducir fatiga globalmente hasta que aparezca el próximo lote
+            while (!anyUnitReady)
+            {
+                foreach (var unit in allUnits)
+                {
+                    unit.ReduceFatigue(1);
+                }
+            }
+
+            // Reiniciar el estado de acción para el nuevo ciclo
             foreach (var unit in allUnits)
             {
-                unit.ReduceFatigue(1); // Reduce 1 punto por "tick" de tiempo
+                unit.hasActedThisRound = false;
             }
+
+            activeUnits = allUnits.Where(u => u.fatigue <= 0 && !u.hasActedThisRound).ToList();
         }
-
-        allUnits = allUnits.OrderBy(u => u.fatigue).ToList();
-        currentActiveUnit = allUnits.First(u => u.fatigue <= 0);
-
-        // 3. Ceder el control a la unidad (y a su jugador)
-        Debug.Log($"Turno de {currentActiveUnit.name}. Coste de fatiga actual: {currentActiveUnit.fatigue}");
-        currentActiveUnit.StartTurn();
+        SelectNextUnit();
     }
 
-    // Se llama cuando la unidad termina de moverse o atacar
-    public void OnUnitActionCompleted(Unit unit, int actionFatigueCost)
-    {
-        unit.AddFatigue(actionFatigueCost);
-        currentActiveUnit = null;
 
-        // Volver a calcular quién sigue en la cola
-        CalculateNextTurn();
+    public void SelectNextUnit()
+    {
+        
+        if (activeUnits.Count > 0)
+        {
+            activePlayer = activeUnits.First().owner;
+            currentActiveUnit = activeUnits.First();
+            currentActiveUnit.StartTurn();
+
+            OnActiveUnitChanged?.Invoke(currentActiveUnit);
+            UpdateUIQueue();
+        }
+        else
+        {
+            currentActiveUnit = null;
+            OnActiveUnitChanged?.Invoke(null);
+            StartNextBatchOrReduce();
+        }
+    }
+
+
+
+    // Se llama cuando la unidad termina de moverse o atacar
+    public void CompleteUnitAction(Unit unit, int fatigueCost)
+    {
+        unit.AddFatigue(fatigueCost);
+        unit.hasActedThisRound = true;
+        currentActiveUnit = null;
+        activeUnits.RemoveAt(0);
+        SelectNextUnit();
+    }
+
+    public List<Unit> GetUpcomingQueue()
+    {
+        // Ordenar la cola de la UI por menor fatiga
+        return allUnits.OrderBy(u => u.fatigue).ToList();
+    }
+
+    private void UpdateUIQueue()
+    {
+        OnQueueUpdated?.Invoke(GetUpcomingQueue());
+    }
+
+    public void unitReady()
+    {
+        this.anyUnitReady = true;
     }
 }
