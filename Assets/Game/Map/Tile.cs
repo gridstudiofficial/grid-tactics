@@ -2,7 +2,16 @@
 using UnityEngine;
 
 /// <summary>
-/// Tipos de terreno provisionales para las casillas del mapa.
+/// Tipos de base de una casilla.
+/// </summary>
+public enum TileBaseType
+{
+    Ground,
+    Water
+}
+
+/// <summary>
+/// Tipos de terreno que puede tener una casilla.
 /// </summary>
 public enum TerrainType
 {
@@ -13,17 +22,28 @@ public enum TerrainType
 }
 
 /// <summary>
-/// Representa una casilla del mapa de Grid Tactics.
+/// Representa una casilla del mapa.
 /// </summary>
 public class Tile
 {
     public Vector2Int position { get; }
 
-    public TerrainType terrain { get; set; }
+    public TileBaseType baseType { get; private set; }
 
-    public Tile(Vector2Int position, TerrainType terrain = TerrainType.Grass)
+    public TerrainType? terrain { get; set; }
+
+    public Tile(
+        Vector2Int position,
+        TileBaseType baseType = TileBaseType.Ground,
+        TerrainType? terrain = null)
     {
         this.position = position;
+        this.baseType = baseType;
         this.terrain = terrain;
+    }
+
+    public void SetBaseType(TileBaseType baseType)
+    {
+        this.baseType = baseType;
     }
 }

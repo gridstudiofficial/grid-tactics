@@ -267,6 +267,7 @@ GameObject:
   - component: {fileID: 1446643841}
   - component: {fileID: 1446643843}
   - component: {fileID: 1446643842}
+  - component: {fileID: 1446643844}
   m_Layer: 0
   m_Name: Tilemap
   m_TagString: Untagged
@@ -9429,6 +9430,23 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &1446643844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1446643840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 349c77da84dfc3f4dbb3df21045b3ee0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TilemapReader
+  tilemap: {fileID: 1446643843}
+  grassTile: {fileID: 11400000, guid: bf6394c1c9265b042aad31332b9d4a56, type: 2}
+  waterTile: {fileID: 11400000, guid: 3b3dcb27e8e6627469f071be0dfb777d, type: 2}
+  sandTile: {fileID: 11400000, guid: dced4f08b3b5d184985dd263ecf939d5, type: 2}
+  mountainTile: {fileID: 11400000, guid: 75237fa304688c04fbc242aefafb0769, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

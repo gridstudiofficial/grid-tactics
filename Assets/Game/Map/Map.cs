@@ -50,14 +50,26 @@ public class Map
         return tiles[position.x, position.y];
     }
 
-    public void SetTerrain(Vector2Int position, TerrainType terrain)
+    public void SetTerrain(Vector2Int position, TerrainType? terrain)
     {
         GetTile(position).terrain = terrain;
     }
 
-    public TerrainType GetTerrain(Vector2Int position)
+    public TerrainType? GetTerrain(Vector2Int position)
     {
         return GetTile(position).terrain;
     }
+
+
+    public TileBaseType GetBaseType(Vector2Int position)
+    {
+        return GetTile(position).baseType;
+    }
+
+    public void SetBaseType(Vector2Int position, TileBaseType baseType)
+    {
+        GetTile(position).SetBaseType(baseType);
+    }
+
 
 }
