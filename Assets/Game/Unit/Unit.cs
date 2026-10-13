@@ -1,12 +1,15 @@
-using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 using Game.Team.Player;
+using UnityEngine;
 public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 {
+
     [Header("Atributos de la Unidad")]
     [field: SerializeField] public Vector2Int position { get; set; } = Vector2Int.zero;
     [field: SerializeField] public int movementRange { get; set; } = 3;
     [field: SerializeField]  public string id { get; set; } = "";
+    [SerializeField] private float moveSpeed = 5f; //VELOCIDAD DE MOVIMIENTO DE LA ANIMACION
     [Header("Visuales del Pathing")]
     [SerializeField] private GameObject rangeHighlightPrefab;
     [SerializeField] private GameObject pathHighlightPrefab;
@@ -31,6 +34,11 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     private Vector2Int lastRenderedTarget = new Vector2Int(-999, -999);
 
     private bool justTurnedOn = false;
+    private bool isMoving = false; // Controla si la unidad está en movimiento animado
+    private bool waitingForActionDecision = false; // Controla si está esperando que el jugador elija una acción en el menú
+    private int pendingFatigueCost = 0;
+
+    public List<UnitAction> availableActions = new List<UnitAction>();
 
     public Unit() => id = "";
 
@@ -62,7 +70,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 
     protected virtual void Update()
     {
-        if (isSelected && isMyTurn)
+        if (isSelected && isMyTurn && !isMoving && !waitingForActionDecision)
         {
             if (justTurnedOn)
             {
@@ -85,8 +93,15 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     {
         isMyTurn = true;
         justTurnedOn = true;
+        waitingForActionDecision = false;
         // Opcional: Auto-seleccionar la unidad y centrar la cámara cuando inicie su turno
         SelectUnit();
+    }
+
+    public void ExecuteWaitAction()
+    {
+        waitingForActionDecision = false;
+        EndTurn(pendingFatigueCost);
     }
 
     public void EndTurn(int cost)
@@ -99,7 +114,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 
     private void OnMouseDown()
     {
-        if (!isSelected && isMyTurn)
+        if (!isSelected && isMyTurn && !isMoving && !waitingForActionDecision)
         {
             SelectUnit();
         }
@@ -117,7 +132,6 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
         usingKeyboard = false;
         ShowCursor();
 
-        Debug.Log("Unidad seleccionada. Esperando destino...");
     }
 
     public void DeselectUnit()
@@ -126,7 +140,6 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
         HideMovementRange();
         ClearPathVisuals();
         ShowCursor();
-        Debug.Log($"Unidad {gameObject.name} deseleccionada.");
     }
 
     private void ProcessInputMode()
@@ -172,27 +185,74 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
             Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector2Int targetGridPos = new Vector2Int(Mathf.RoundToInt(mousePos.x), Mathf.RoundToInt(mousePos.y));
 
-            MoveTo(targetGridPos);
+            InitiateMovement(targetGridPos);
         }
     }
 
-    private void MoveTo(Vector2Int targetPos)
+    private void InitiateMovement(Vector2Int targetPos)
     {
-        if (!isMyTurn) return;
+        if (!isMyTurn || isMoving) return;
         Vector2Int finalDestination = GetClosestValidPosition(targetPos);
-        position = finalDestination;
-        int distanceMoved = Mathf.RoundToInt(Vector2.Distance(position, finalDestination));
-        int totalFatigueCost = 10 + (distanceMoved * 5);
+        List<Vector2Int> path = FindPath(position, finalDestination);
+        if (path.Count > 0)
+        {
+            int distanceMoved = path.Count;
+            pendingFatigueCost = 10 + (distanceMoved * 5); // Cálculo de fatiga basado en casillas recorridas
 
+            HideMovementRange();
+            ClearPathVisuals();
 
-        UpdateVisualPosition();
-        DeselectUnit();
-        Debug.Log($"Unidad movida a {position}");
-
-        EndTurn(totalFatigueCost);
+            // Iniciar movimiento suave por corrutina
+            StartCoroutine(MoveAlongPath(path));
+        }
+        else
+        {
+            // Si no hay que moverse (clic en la misma casilla), abrir menú directamente
+            pendingFatigueCost = 10;
+            HideMovementRange();
+            ClearPathVisuals();
+            OpenActionMenu();
+        }
     }
 
+    private IEnumerator MoveAlongPath(List<Vector2Int> path)
+    {
+        isMoving = true;
 
+        foreach (Vector2Int step in path)
+        {
+            Vector3 targetWorldPos = new Vector3(step.x, step.y, 0f);
+
+            while (Vector3.Distance(transform.position, targetWorldPos) > 0.01f)
+            {
+                transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, moveSpeed * Time.deltaTime);
+                yield return null;
+            }
+
+            transform.position = targetWorldPos;
+            position = step; // Actualizar posición lógica paso a paso
+        }
+
+        isMoving = false;
+        OpenActionMenu();
+    }
+
+    private void OpenActionMenu()
+    {
+        waitingForActionDecision = true;
+        Debug.Log($"Unidad {id} llegó a destino. Abriendo Menú de Acciones UI...");
+
+        // Abrir el menú visual de acciones
+        if (ActionMenuUI.Instance != null)
+        {
+            ActionMenuUI.Instance.ShowMenu(this);
+        }
+        else
+        {
+            // Fallback por si la UI no está colocada en la escena
+            ExecuteWaitAction();
+        }
+    }
     private void CalculateValidMoves()
     {
         validMoves.Clear();
