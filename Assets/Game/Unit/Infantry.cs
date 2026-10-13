@@ -6,6 +6,8 @@ public class Infantry : Unit
     protected override void Start()
     {
         base.Start(); // Ejecuta la inicialización visual de la clase Unit
+        availableActions.Add(new AttackAction());
+        availableActions.Add(new WaitAction());
     }
 
 }

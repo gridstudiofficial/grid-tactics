@@ -61,7 +61,7 @@ public class TurnUI : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
-
+        queueUnits.RemoveAt(0);
         // Rellenar con las unidades ordenadas por fatiga
         foreach (var unit in queueUnits)
         {
