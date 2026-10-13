@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Game.Team.Player;
 using UnityEngine;
+using Pausa;
 public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 {
 
@@ -300,6 +301,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     // Algoritmo BFS para encontrar el camino más corto
     private List<Vector2Int> FindPath(Vector2Int start, Vector2Int target)
     {
+        if (MenuPausa.Instance.estaPausado) return new List<Vector2Int>();
         Queue<Vector2Int> queue = new Queue<Vector2Int>();
         Dictionary<Vector2Int, Vector2Int> cameFrom = new Dictionary<Vector2Int, Vector2Int>();
 

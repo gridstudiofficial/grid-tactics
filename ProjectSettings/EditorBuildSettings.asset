@@ -14,5 +14,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/PantallaCreditos.unity
     guid: f97d6f65b3c3db14f9037af2c2a873b0
+  - enabled: 1
+    path: Assets/Scenes/PruebasPepiur.unity
+    guid: 0f64746f4960815488071f860643975d
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

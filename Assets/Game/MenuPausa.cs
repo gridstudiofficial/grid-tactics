@@ -2,16 +2,22 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
 
-public class MenuPausa : MonoBehaviour
+namespace Pausa { public class MenuPausa : MonoBehaviour
 {
     [SerializeField] private GameObject menuPausa;
     [SerializeField] private GameObject botonPausa;
-    private bool estaPausado = false;
+    public static MenuPausa Instance { get; private set; }
+        public bool estaPausado = false;
 
+        private void Awake()
+        {
+            if (Instance == null) Instance = this;
+            else Destroy(gameObject);
+        }
 
-    private void Update()
+        private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.P))
         {
             if (estaPausado)
             {
@@ -43,4 +49,5 @@ public class MenuPausa : MonoBehaviour
         Time.timeScale = 1f; // Asegúrate de reanudar el tiempo antes de salir
         SceneManager.LoadScene(nombreEscena);
     }
+}
 }
