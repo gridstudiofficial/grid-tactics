@@ -1,213 +1,132 @@
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Game.Team.Player;
-using UnityEngine;
+using TMPro;
+
 public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 {
-
     [Header("Atributos de la Unidad")]
     [field: SerializeField] public Vector2Int position { get; set; } = Vector2Int.zero;
     [field: SerializeField] public int movementRange { get; set; } = 3;
-    [field: SerializeField]  public string id { get; set; } = "";
-    [SerializeField] private float moveSpeed = 5f; //VELOCIDAD DE MOVIMIENTO DE LA ANIMACION
-    [Header("Visuales del Pathing")]
+    [field: SerializeField] public string id { get; set; } = "";
+    [SerializeField] private float moveSpeed = 5f;
+    public bool canFly = false; // Define si ignora restricciones de terreno
+
+    [Header("Visuales y UI Local")]
     [SerializeField] private GameObject rangeHighlightPrefab;
     [SerializeField] private GameObject pathHighlightPrefab;
-    [field: SerializeField]  public  Player owner {get; set;}
-    [field :SerializeField]public int fatigue { get; set; }
+    [SerializeField] private SpriteRenderer unitSpriteRenderer;
+    [SerializeField] private TextMeshProUGUI hpTextDisplay; // Texto con la vida al lado de la ficha
+
+    [Header("Colores de Estado")]
+    [SerializeField] private Color activeColor;
+    [SerializeField] private Color exhaustedColor = new Color(0.4f, 0.4f, 0.4f, 1f); // Oscuro al agotar turno
+
+    [field: SerializeField] public Player owner { get; set; }
+    [field: SerializeField] public int fatigue { get; set; }
     public int currentHP { get; set; } = 10;
     public int maxHP { get; set; } = 10;
 
     [field: SerializeField] public bool isMyTurn { get; private set; } = false;
+    public bool hasActedThisRound = false;
 
     private List<GameObject> activeRangeVisuals = new List<GameObject>();
     private List<GameObject> activePathVisuals = new List<GameObject>();
-
-    [Header("Estado de Selección")]
-    [field: SerializeField] private bool isSelected = false;
-    public bool hasActedThisRound = false;
     private List<Vector2Int> validMoves = new List<Vector2Int>();
-
-    private Vector2Int currentTargetGridPos; // Posición actual del cursor/destino en la cuadrícula
-    private Vector3 lastMouseScreenPosition; // Para detectar movimiento físico del ratón
-    private bool usingKeyboard = false;
-    private Vector2Int lastRenderedTarget = new Vector2Int(-999, -999);
-
-    private bool justTurnedOn = false;
-    private bool isMoving = false; // Controla si la unidad está en movimiento animado
-    private bool waitingForActionDecision = false; // Controla si está esperando que el jugador elija una acción en el menú
-    private int pendingFatigueCost = 0;
 
     public List<UnitAction> availableActions = new List<UnitAction>();
 
-    public Unit() => id = "";
+    private bool isMoving = false;
+    private int pendingFatigueCost = 0;
+    private Vector2Int initialPosition;
+    private int initialFatigue;
 
-    //public Vector2Int Position()
-    //turn this.position
+    [Header("Clasificación y Combate")]
+    [field: SerializeField] public int unitID { get; set; } = 0; // ID numérico para la matriz
+    [field: SerializeField] public UnitMovementType movementType { get; set; } = UnitMovementType.Ground;
 
-    //public GetAviableActions(GameState A?) { return this.Actions}
+    public void TakeDamage(int damage)
+    {
+        this.currentHP = Mathf.Max(0, this.currentHP - damage);
+        UpdateHealthDisplay();
+    }
 
-    public void TakeDamage(int damage) { this.currentHP -= damage; } //death(); }
-    public void Heal(int heal) { this.currentHP = this.currentHP + heal > this.maxHP ? this.maxHP : this.currentHP + heal; }
-    public void ReduceFatigue(int amount) { this.fatigue -= amount; if (this.fatigue == 0) { TurnManager.Instance.unitReady(); } }
+    public void Heal(int heal)
+    {
+        this.currentHP = Mathf.Min(this.currentHP + heal, this.maxHP);
+        UpdateHealthDisplay();
+    }
 
+    public void ReduceFatigue(int amount)
+    {
+        this.fatigue -= amount;
+        if (this.fatigue <= 0) { TurnManager.Instance.unitReady(); }
+    }
+    public void AddFatigue(int amount) { this.fatigue += amount; }
 
-
-    //public T? GetComponent<T>()
-
-    //public T? RemoveComponent<T>()
-
-    //protected void OnActivationStart(){}
-
-    //protected void OnActivationEnd(){}
-
+    protected virtual void Awake()
+    {
+        activeColor = this.GetComponent<SpriteRenderer>().color;
+        exhaustedColor = new Color(activeColor.r * 0.4f, activeColor.g * 0.4f, activeColor.b * 0.4f, 1f);
+    }
 
     protected virtual void Start()
     {
+        if (unitSpriteRenderer == null) unitSpriteRenderer = GetComponent<SpriteRenderer>();
         UpdateVisualPosition();
+        UpdateHealthDisplay();
+        SetExhaustedState(false); // Color normal al inicio
+
         if (TurnManager.Instance != null) TurnManager.Instance.RegisterUnit(this);
     }
 
-    protected virtual void Update()
+    public void UpdateHealthDisplay()
     {
-        if (isSelected && isMyTurn && !isMoving && !waitingForActionDecision)
+        if (hpTextDisplay != null)
         {
-            if (justTurnedOn)
-            {
-                justTurnedOn = false;
-                return;
-            }
-
-            ProcessInputMode();
-            UpdatePathPreview();
-            HandleMovementInput();
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                DeselectUnit();
-            }
+            hpTextDisplay.text = currentHP.ToString();
         }
+    }
 
+    public void SetExhaustedState(bool exhausted)
+    {
+        if (unitSpriteRenderer != null)
+        {
+            unitSpriteRenderer.color = exhausted ? exhaustedColor : activeColor;
+        }
     }
 
     public void StartTurn()
     {
         isMyTurn = true;
-        justTurnedOn = true;
-        waitingForActionDecision = false;
-        // Opcional: Auto-seleccionar la unidad y centrar la cámara cuando inicie su turno
-        SelectUnit();
+        SetExhaustedState(false);
     }
 
-    public void ExecuteWaitAction()
+    public void BeginMovementSelection()
     {
-        waitingForActionDecision = false;
-        EndTurn(pendingFatigueCost);
-    }
-
-    public void EndTurn(int cost)
-    {
-        isMyTurn = false;
-        DeselectUnit();
-        // Notificar al gestor que terminamos y cuánta fatiga generó la acción
-        TurnManager.Instance.CompleteUnitAction(this, cost);
-    }
-
-    private void OnMouseDown()
-    {
-        if (!isSelected && isMyTurn && !isMoving && !waitingForActionDecision)
-        {
-            SelectUnit();
-        }
-    }
-
-
-    private void SelectUnit()
-    {
-        isSelected = true;
-        CalculateValidMoves();
+        initialPosition = position;
+        initialFatigue = fatigue;
+        CalculateValidMovesWithTerrain();
         ShowMovementRange();
-
-        currentTargetGridPos = position;
-        lastMouseScreenPosition = Input.mousePosition;
-        usingKeyboard = false;
-        ShowCursor();
-
     }
 
-    public void DeselectUnit()
-    {
-        isSelected = false;
-        HideMovementRange();
-        ClearPathVisuals();
-        ShowCursor();
-    }
+    public List<Vector2Int> GetValidMoves() => validMoves;
 
-    private void ProcessInputMode()
-    {
-        float mouseDistance = Vector3.Distance(Input.mousePosition, lastMouseScreenPosition);
-        if (mouseDistance > 0.5f)
-        {
-            if (usingKeyboard)
-            {
-                usingKeyboard = false;
-                ShowCursor();
-            }
-            lastMouseScreenPosition = Input.mousePosition;
-        }
-
-        Vector2Int keyDirection = Vector2Int.zero;
-        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) keyDirection.y += 1;
-        if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) keyDirection.y -= 1;
-        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) keyDirection.x -= 1;
-        if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)) keyDirection.x += 1;
-
-        if (keyDirection != Vector2Int.zero)
-        {
-            if (!usingKeyboard)
-            {
-                usingKeyboard = true;
-                HideCursor();
-            }
-            currentTargetGridPos += keyDirection;
-        }
-        else if (!usingKeyboard)
-        {
-            Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            currentTargetGridPos = new Vector2Int(Mathf.RoundToInt(mouseWorldPos.x), Mathf.RoundToInt(mouseWorldPos.y));
-        }
-    }
-
-
-    private void HandleMovementInput()
-    {
-        if (Input.GetMouseButtonDown(1) || (usingKeyboard && Input.GetKeyDown(KeyCode.KeypadEnter)))
-        {
-            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector2Int targetGridPos = new Vector2Int(Mathf.RoundToInt(mousePos.x), Mathf.RoundToInt(mousePos.y));
-
-            InitiateMovement(targetGridPos);
-        }
-    }
-
-    private void InitiateMovement(Vector2Int targetPos)
+    public void ExecuteMovementTo(Vector2Int targetPos)
     {
         if (!isMyTurn || isMoving) return;
-        Vector2Int finalDestination = GetClosestValidPosition(targetPos);
-        List<Vector2Int> path = FindPath(position, finalDestination);
+
+        List<Vector2Int> path = FindPathTo(targetPos);
         if (path.Count > 0)
         {
-            int distanceMoved = path.Count;
-            pendingFatigueCost = 10 + (distanceMoved * 5); // Cálculo de fatiga basado en casillas recorridas
-
+            pendingFatigueCost = 10 + (path.Count * 5);
             HideMovementRange();
             ClearPathVisuals();
-
-            // Iniciar movimiento suave por corrutina
             StartCoroutine(MoveAlongPath(path));
         }
         else
         {
-            // Si no hay que moverse (clic en la misma casilla), abrir menú directamente
             pendingFatigueCost = 10;
             HideMovementRange();
             ClearPathVisuals();
@@ -218,62 +137,109 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     private IEnumerator MoveAlongPath(List<Vector2Int> path)
     {
         isMoving = true;
-
         foreach (Vector2Int step in path)
         {
             Vector3 targetWorldPos = new Vector3(step.x, step.y, 0f);
-
             while (Vector3.Distance(transform.position, targetWorldPos) > 0.01f)
             {
                 transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, moveSpeed * Time.deltaTime);
                 yield return null;
             }
-
             transform.position = targetWorldPos;
-            position = step; // Actualizar posición lógica paso a paso
+            position = step;
         }
-
         isMoving = false;
         OpenActionMenu();
     }
 
     private void OpenActionMenu()
     {
-        waitingForActionDecision = true;
-        Debug.Log($"Unidad {id} llegó a destino. Abriendo Menú de Acciones UI...");
-
-        // Abrir el menú visual de acciones
+        MapCursor.Instance.SetActionMenuMode(this);
         if (ActionMenuUI.Instance != null)
         {
             ActionMenuUI.Instance.ShowMenu(this);
         }
         else
         {
-            // Fallback por si la UI no está colocada en la escena
             ExecuteWaitAction();
         }
     }
-    private void CalculateValidMoves()
+
+    public void ExecuteWaitAction()
+    {
+        EndTurn(pendingFatigueCost);
+    }
+
+    public void EndTurn(int cost)
+    {
+        isMyTurn = false;
+        SetExhaustedState(true); // Oscurecer el sprite al acabar la acción
+        DeselectUnit();
+        MapCursor.Instance.ResetToFreeMode();
+        TurnManager.Instance.CompleteUnitAction(this, cost);
+    }
+
+    public void RevertToInitialState()
+    {
+        position = initialPosition;
+        fatigue = initialFatigue;
+        SetExhaustedState(false);
+        UpdateVisualPosition();
+        DeselectUnit();
+    }
+
+    public void DeselectUnit()
+    {
+        HideMovementRange();
+        ClearPathVisuals();
+    }
+
+    // --- CÁLCULO DE MOVIMIENTO RECONOCIENDO TERRENO ---
+    private void CalculateValidMovesWithTerrain()
     {
         validMoves.Clear();
-        for (int x = -movementRange; x <= movementRange; x++)
+        Queue<Vector2Int> frontier = new Queue<Vector2Int>();
+        Dictionary<Vector2Int, int> costSoFar = new Dictionary<Vector2Int, int>();
+
+        frontier.Enqueue(position);
+        costSoFar[position] = 0;
+        validMoves.Add(position);
+
+        Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+
+        while (frontier.Count > 0)
         {
-            for (int y = -movementRange; y <= movementRange; y++)
+            Vector2Int current = frontier.Dequeue();
+
+            foreach (Vector2Int dir in directions)
             {
-                if (Mathf.Abs(x) + Mathf.Abs(y) <= movementRange)
+                Vector2Int next = current + dir;
+
+                // Verificar si el tipo de unidad puede pasar por este terreno
+                TerrainType terrain = MapTerrain.Instance != null ? MapTerrain.Instance.GetTerrainAt(next) : TerrainType.Plains;
+                bool canPass = MapTerrain.Instance == null || MapTerrain.Instance.CanUnitTypePassTerrain(movementType, terrain);
+
+                if (canPass)
                 {
-                    validMoves.Add(new Vector2Int(position.x + x, position.y + y));
+                    int newCost = costSoFar[current] + 1; // Coste 1 por casilla transitable
+
+                    if (newCost <= movementRange)
+                    {
+                        if (!costSoFar.ContainsKey(next) || newCost < costSoFar[next])
+                        {
+                            costSoFar[next] = newCost;
+                            frontier.Enqueue(next);
+                            if (!validMoves.Contains(next)) validMoves.Add(next);
+                        }
+                    }
                 }
             }
         }
     }
 
-    private Vector2Int GetClosestValidPosition(Vector2Int clickedPos)
+    public Vector2Int GetClosestValidPosition(Vector2Int clickedPos)
     {
-        if (validMoves.Contains(clickedPos))
-        {
-            return clickedPos;
-        }
+        if (validMoves.Contains(clickedPos)) return clickedPos;
 
         Vector2Int bestTile = position;
         float minDistance = float.MaxValue;
@@ -287,17 +253,15 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
                 bestTile = tile;
             }
         }
-
         return bestTile;
     }
 
-    public void AddFatigue(int amount)
+    public List<Vector2Int> FindPathTo(Vector2Int target)
     {
-        this.fatigue += amount;
+        Vector2Int validTarget = GetClosestValidPosition(target);
+        return FindPath(position, validTarget);
     }
 
-
-    // Algoritmo BFS para encontrar el camino más corto
     private List<Vector2Int> FindPath(Vector2Int start, Vector2Int target)
     {
         Queue<Vector2Int> queue = new Queue<Vector2Int>();
@@ -316,7 +280,6 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
             foreach (Vector2Int dir in directions)
             {
                 Vector2Int next = current + dir;
-                // Solo nos movemos por las casillas válidas
                 if (validMoves.Contains(next) && !cameFrom.ContainsKey(next))
                 {
                     queue.Enqueue(next);
@@ -326,7 +289,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
         }
 
         List<Vector2Int> path = new List<Vector2Int>();
-        if (!cameFrom.ContainsKey(target)) return path; // No hay ruta
+        if (!cameFrom.ContainsKey(target)) return path;
 
         Vector2Int curr = target;
         while (curr != start)
@@ -338,34 +301,9 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
         return path;
     }
 
-    // --- REPRESENTACIÓN VISUAL ---
-
-    private void UpdatePathPreview()
-    {
-        // Solo instanciar o actualizar visuales si la posición objetivo cambió
-        if (currentTargetGridPos != lastRenderedTarget)
-        {
-            lastRenderedTarget = currentTargetGridPos;
-            ClearPathVisuals();
-
-            currentTargetGridPos = GetClosestValidPosition(currentTargetGridPos);
-            List<Vector2Int> path = FindPath(position, currentTargetGridPos);
-
-            foreach (Vector2Int pathNode in path)
-            {
-                if (pathHighlightPrefab != null)
-                {
-                    GameObject redTile = Instantiate(pathHighlightPrefab, new Vector3(pathNode.x, pathNode.y, 0), Quaternion.identity);
-                    activePathVisuals.Add(redTile);
-                }
-            }
-        }
-    }
-
     protected virtual void ShowMovementRange()
     {
         if (rangeHighlightPrefab == null) return;
-
         foreach (Vector2Int tile in validMoves)
         {
             GameObject blueTile = Instantiate(rangeHighlightPrefab, new Vector3(tile.x, tile.y, 0), Quaternion.identity);
@@ -375,38 +313,18 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 
     protected virtual void HideMovementRange()
     {
-        foreach (GameObject visual in activeRangeVisuals)
-        {
-            Destroy(visual);
-        }
+        foreach (GameObject visual in activeRangeVisuals) Destroy(visual);
         activeRangeVisuals.Clear();
     }
 
     private void ClearPathVisuals()
     {
-        foreach (GameObject visual in activePathVisuals)
-        {
-            Destroy(visual);
-        }
+        foreach (GameObject visual in activePathVisuals) Destroy(visual);
         activePathVisuals.Clear();
     }
-
-
 
     private void UpdateVisualPosition()
     {
         transform.position = new Vector3(position.x, position.y, 0f);
     }
-
-
-    private void HideCursor()
-    {
-        Cursor.visible = false;
-    }
-
-    private void ShowCursor()
-    {
-        Cursor.visible = true;
-    }
-
 }
