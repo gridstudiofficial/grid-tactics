@@ -128,7 +128,10 @@ public class MapCursor : MonoBehaviour
             return;
         }
 
-        if(unitUnderCursor != null)
+        Unit unit = TurnManager.Instance.allUnits.FirstOrDefault(u =>
+        u.position == position);
+
+        if (unit != null)
         {
             return;
         }
@@ -140,6 +143,13 @@ public class MapCursor : MonoBehaviour
 
         if (factoryUnderCursor != null)
         {
+            // Verificación estricta: Si está fatigada, ignoramos el input y no abrimos el menú
+            if (factoryUnderCursor.fatigue > 0)
+            {
+                Debug.Log("Esta fábrica está fatigada y no se puede abrir.");
+                return;
+            }
+
             OpenFactoryMenu(factoryUnderCursor);
         }
     }

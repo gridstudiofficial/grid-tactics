@@ -20,6 +20,9 @@ public class TurnManager : MonoBehaviour
     public System.Action<Unit> OnActiveUnitChanged;
     public System.Action<List<Unit>> OnQueueUpdated;
 
+    // Añade esta lista y método en tu TurnManager:
+    public List<Factory> allFactories = new List<Factory>();
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -33,6 +36,12 @@ public class TurnManager : MonoBehaviour
         //StartNextBatchOrReduce();
     }
 
+    public void RegisterFactory(Factory factory)
+    {
+        if (!allFactories.Contains(factory))
+            allFactories.Add(factory);
+    }
+
     public void RegisterUnit(Unit unit)
     {
         if (!allUnits.Contains(unit))
@@ -41,21 +50,23 @@ public class TurnManager : MonoBehaviour
 
     public void StartNextBatchOrReduce()
     {
-        activeUnits  = allUnits.Where(u => u.fatigue <= 0 && !u.hasActedThisRound).ToList();
+        activeUnits = allUnits.Where(u => u.fatigue <= 0 && !u.hasActedThisRound).ToList();
 
         if (activeUnits.Count == 0)
         {
             anyUnitReady = false;
-            // Nadie tiene fatiga 0. Reducir fatiga globalmente hasta que aparezca el próximo lote
             while (!anyUnitReady)
             {
                 foreach (var unit in allUnits)
                 {
                     unit.ReduceFatigue(1);
                 }
+                foreach (var factory in allFactories) // <-- Reducir fatiga de las fábricas
+                {
+                    factory.ReduceFatigue(1);
+                }
             }
 
-            // Reiniciar el estado de acción para el nuevo ciclo
             foreach (var unit in allUnits)
             {
                 unit.hasActedThisRound = false;

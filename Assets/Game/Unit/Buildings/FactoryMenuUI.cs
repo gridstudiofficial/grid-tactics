@@ -42,7 +42,7 @@ public class FactoryMenuUI : MonoBehaviour
         foreach (var btn in spawnedButtons) Destroy(btn);
         spawnedButtons.Clear();
 
-        foreach (var unitData in currentFactory.availableUnitsToBuild)
+        foreach (var unitData in currentFactory.producibleUnits)
         {
             if (unitButtonPrefab != null && buttonContainer != null)
             {
