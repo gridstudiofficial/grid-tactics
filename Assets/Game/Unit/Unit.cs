@@ -42,8 +42,8 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     private Vector2Int initialPosition;
     private int initialFatigue;
 
-    [Header("ClasificaciÛn y Combate")]
-    [field: SerializeField] public int unitID { get; set; } = 0; // ID numÈrico para la matriz
+    [Header("Clasificaci√≥n y Combate")]
+    [field: SerializeField] public int unitID { get; set; } = 0; // ID num√©rico para la matriz
     [field: SerializeField] public UnitMovementType movementType { get; set; } = UnitMovementType.Ground;
 
     public void TakeDamage(int damage)
@@ -173,7 +173,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     public void EndTurn(int cost)
     {
         isMyTurn = false;
-        SetExhaustedState(true); // Oscurecer el sprite al acabar la acciÛn
+        SetExhaustedState(true); // Oscurecer el sprite al acabar la acci√≥n
         DeselectUnit();
         MapCursor.Instance.ResetToFreeMode();
         TurnManager.Instance.CompleteUnitAction(this, cost);
@@ -194,7 +194,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
         ClearPathVisuals();
     }
 
-    // --- C¡LCULO DE MOVIMIENTO RECONOCIENDO TERRENO ---
+    // --- C√ÅLCULO DE MOVIMIENTO RECONOCIENDO TERRENO ---
     private void CalculateValidMovesWithTerrain()
     {
         validMoves.Clear();
@@ -264,6 +264,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 
     private List<Vector2Int> FindPath(Vector2Int start, Vector2Int target)
     {
+        if (MenuPausa.Instance.estaPausado) return new List<Vector2Int>();
         Queue<Vector2Int> queue = new Queue<Vector2Int>();
         Dictionary<Vector2Int, Vector2Int> cameFrom = new Dictionary<Vector2Int, Vector2Int>();
 
