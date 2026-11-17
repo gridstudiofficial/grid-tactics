@@ -1,53 +1,99 @@
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using System.Collections.Generic;
 
 public enum TerrainType
 {
-    Plains,    // Transitable para Tierra y Aire
-    Water,     // Transitable solo para Agua y Aire
-    Mountain   // Transitable solo para Aire (o Tierra según balance)
+    Plains,    // Llanura / Hierba
+    Water,     // Agua
+    Mountain,  // Montaña
+    Sand,      // Arena
+    Forest     // Bosque
+}
+
+[System.Serializable]
+public struct TileTerrainData
+{
+    public TileBase tileAsset;       // Arrastra aquí tu Grass.asset, Water.asset, etc.
+    public TerrainType terrainType;  // Tipo de terreno lógico
+
+    [Header("Costes de Movimiento por Tipo de Unidad")]
+    public int costGround;           // 999 = Impasable
+    public int costWater;
+    public int costAir;
 }
 
 public class MapTerrain : MonoBehaviour
 {
-    public static MapTerrain Instance { get; set; }
-    private Dictionary<Vector2Int, TerrainType> gridTerrain = new Dictionary<Vector2Int, TerrainType>();
+    public static MapTerrain Instance { get; private set; }
+
+    [Header("Referencia al Tilemap de la Escena")]
+    [SerializeField] private Tilemap tilemap;
+
+    [Header("Base de Datos de Terrenos")]
+    [SerializeField] private List<TileTerrainData> tileDatabase = new List<TileTerrainData>();
+
+    private Dictionary<TileBase, TileTerrainData> tileLookup = new Dictionary<TileBase, TileTerrainData>();
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
-    }
 
-    public TerrainType GetTerrainAt(Vector2Int pos)
-    {
-        if (gridTerrain.TryGetValue(pos, out TerrainType type)) return type;
-        return TerrainType.Plains; // Por defecto Llanura (Tierra)
-    }
-
-    public void SetTerrainAt(Vector2Int pos, TerrainType type)
-    {
-        gridTerrain[pos] = type;
-    }
-
-    // Comprueba si un tipo de unidad puede transitar por un terreno específico
-    public bool CanUnitTypePassTerrain(UnitMovementType unitType, TerrainType terrain)
-    {
-        switch (unitType)
+        // Construir un diccionario rápido para optimizar la búsqueda en tiempo de ejecución
+        foreach (var data in tileDatabase)
         {
-            case UnitMovementType.Ground:
-                return terrain == TerrainType.Plains; // Tierra solo por llanuras
-            case UnitMovementType.Water:
-                return terrain == TerrainType.Water;  // Agua solo por casillas de agua
-            case UnitMovementType.Air:
-                return true; // El aire vuela sobre cualquier terreno
-            default:
-                return false;
+            if (data.tileAsset != null && !tileLookup.ContainsKey(data.tileAsset))
+            {
+                tileLookup[data.tileAsset] = data;
+            }
         }
     }
 
-    public int GetMovementCost(Vector2Int pos, UnitMovementType unitType)
+    // Obtiene el tipo de terreno analizando la celda actual del Tilemap
+    public TerrainType GetTerrainAt(Vector2Int pos)
     {
-        return CanUnitTypePassTerrain(unitType, GetTerrainAt(pos)) ? 1 : 999;
+        if (tilemap == null) return TerrainType.Plains;
+
+        TileBase tile = tilemap.GetTile(new Vector3Int(pos.x, pos.y, 0));
+        if (tile != null && tileLookup.TryGetValue(tile, out var data))
+        {
+            return data.terrainType;
+        }
+        return TerrainType.Plains; // Terreno por defecto si la casilla está vacía
+    }
+
+    // Comprueba si una unidad puede transitar por el terreno según su movilidad
+    public bool CanUnitTypePassTerrain(UnitMovementType unitMovementType, TerrainType terrain)
+    {
+        int cost = GetMovementCostForType(unitMovementType, terrain);
+        return cost < 999; // Si el coste es menor a 999, es transitable
+    }
+
+    public int GetMovementCost(Vector2Int pos, UnitMovementType unitMovementType)
+    {
+        TerrainType terrain = GetTerrainAt(pos);
+        return GetMovementCostForType(unitMovementType, terrain);
+    }
+
+    private int GetMovementCostForType(UnitMovementType unitType, TerrainType terrain)
+    {
+        if (tilemap == null) return 1;
+
+        // Buscar en la base de datos el tile correspondiente a esta posición
+        // (O mapear directamente por tipo de terreno)
+        foreach (var data in tileDatabase)
+        {
+            if (data.terrainType == terrain)
+            {
+                switch (unitType)
+                {
+                    case UnitMovementType.Ground: return data.costGround;
+                    case UnitMovementType.Water: return data.costWater;
+                    case UnitMovementType.Air: return data.costAir;
+                }
+            }
+        }
+        return 1; // Coste por defecto
     }
 }
