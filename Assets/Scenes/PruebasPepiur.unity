@@ -883,7 +883,7 @@ MonoBehaviour:
   <isMyTurn>k__BackingField: 0
   hasActedThisRound: 0
   <unitID>k__BackingField: 0
-  <movementType>k__BackingField: 0
+  <movementType>k__BackingField: 1
 --- !u!1 &391681030
 GameObject:
   m_ObjectHideFlags: 0
@@ -2304,7 +2304,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 774702886de908d4b8ab037511c7ddf2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapTerrain
-  tilemap: {fileID: 0}
+  tilemap: {fileID: 2093216105}
   tileDatabase:
   - tileAsset: {fileID: 11400000, guid: bf6394c1c9265b042aad31332b9d4a56, type: 2}
     terrainType: 0
@@ -3169,6 +3169,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MenuPausa
   menuPausa: {fileID: 468971552}
   botonPausa: {fileID: 575362700}
+  estaPausado: 0
 --- !u!1 &1886933718
 GameObject:
   m_ObjectHideFlags: 0

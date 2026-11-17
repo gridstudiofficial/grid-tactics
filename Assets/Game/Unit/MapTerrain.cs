@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
+using System;
 
 public enum TerrainType
 {
@@ -97,4 +98,6 @@ public class MapTerrain : MonoBehaviour
         }
         return 1; // Coste por defecto
     }
+
+
 }
