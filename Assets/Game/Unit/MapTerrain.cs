@@ -8,7 +8,8 @@ public enum TerrainType
     Water,     // Agua
     Mountain,  // Montaña
     Sand,      // Arena
-    Forest     // Bosque
+    Forest,     // Bosque
+    Grass
 }
 
 [System.Serializable]

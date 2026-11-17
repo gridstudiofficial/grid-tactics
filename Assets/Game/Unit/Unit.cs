@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Game.Team.Player;
 using TMPro;
+using Pausa;
 
 public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 {
