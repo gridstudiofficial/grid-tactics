@@ -1,5 +1,9 @@
-using UnityEngine;
+using System.Collections.Generic;
+using Game.Team.Player;
 using Game.Unit.Builgings;
+using UnityEngine;
+
+using System.Linq;
 public class CaptureAction : UnitAction
 {
     public override string ActionName => "Conquistar";
@@ -25,9 +29,15 @@ public class CaptureAction : UnitAction
         if (building != null)
         {
             building.SetOwner(unit.owner);
-            Debug.Log($"¡La unidad {unit.id} conquistó el edificio en {unit.position} para el jugador {unit.owner.Name}!");
+            Debug.Log($"¡La unidad {unit.id} conquistó el edificio en {unit.position} para {unit.owner.Name}!");
+
+            // Comprobar condiciones de victoria tras la conquista (ej. si era el HQ o la mayoría de edificios)
+            List<Player> players = Object.FindObjectsOfType<Building>().Select(b => b.owner).Where(o => o != null).Distinct().ToList();
+            if (WinManager.Instance != null)
+            {
+                WinManager.Instance.CheckWinConditions(players);
+            }
         }
-        // Conquistar gasta el turno de la acción
         unit.ExecuteWaitAction();
     }
 

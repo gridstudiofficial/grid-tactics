@@ -16,6 +16,12 @@ public class AttackAction : UnitAction
 
     public override bool CanExecute(Unit unit)
     {
+        // REQUISITO: Si la unidad no puede atacar después de haberse movido y ya se desplazó, no puede atacar.
+        if (!unit.canMoveAndAttack && unit.hasMovedThisTurn)
+        {
+            return false;
+        }
+
         return FindEnemiesInRange(unit).Count > 0;
     }
 

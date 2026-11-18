@@ -38,8 +38,7 @@ public class TurnManager : MonoBehaviour
 
     public void RegisterFactory(Factory factory)
     {
-        if (!allFactories.Contains(factory))
-            allFactories.Add(factory);
+        if (!allFactories.Contains(factory)) { allFactories.Add(factory); OnActiveUnitChanged?.Invoke(null); }
     }
 
     public void RegisterUnit(Unit unit)
@@ -80,10 +79,17 @@ public class TurnManager : MonoBehaviour
 
     public void SelectNextUnit()
     {
-        
         if (activeUnits.Count > 0)
         {
             activePlayer = activeUnits.First().owner;
+
+            // COMPROBACIÓN DE IA: Si el jugador activo es la IA, delegamos el turno al AIController
+            if (AIController.Instance != null && AIController.Instance.aiPlayer == activePlayer)
+            {
+                AIController.Instance.StartAITurn(activePlayer);
+                return; // Detenemos la selección manual de unidades humanas
+            }
+
             currentActiveUnit = activeUnits.First();
             currentActiveUnit.StartTurn();
 
@@ -97,7 +103,6 @@ public class TurnManager : MonoBehaviour
             StartNextBatchOrReduce();
         }
     }
-
 
 
     // Se llama cuando la unidad termina de moverse o atacar
