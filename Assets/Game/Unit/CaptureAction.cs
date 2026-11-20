@@ -36,7 +36,7 @@ public class CaptureAction : UnitAction
                 // Tutorial intermedio: Primera ciudad capturada por el jugador
                 if (isHumanPlayer && TutorialManager.Instance != null)
                 {
-                    TutorialManager.Instance.PlayById("tuto_primera_ciudad");
+                    TutorialManager.Instance.PlayById("Tuto_primera_ciudad");
                 }
             }
             else

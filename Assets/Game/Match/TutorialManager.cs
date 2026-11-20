@@ -14,6 +14,7 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI bodyText;
     [SerializeField] private TextMeshProUGUI stepCounterText;
     [SerializeField] private Button nextButton;
+    [SerializeField] private Button finishButton;
 
     [Header("Secuencias por Momento")]
     [SerializeField] private List<TutorialSequence> startTutorials = new List<TutorialSequence>();
@@ -36,14 +37,16 @@ public class TutorialManager : MonoBehaviour
 
         if (tutorialPanel != null) tutorialPanel.SetActive(false);
 
-        if (nextButton != null)
+        if (nextButton != null || finishButton != null)
         {
             nextButton.onClick.AddListener(AdvanceOrClose);
+            finishButton.onClick.AddListener(AdvanceOrClose);
         }
     }
 
     private void Start()
     {
+        finishButton.gameObject.SetActive(false);
         TriggerMoment(TutorialTriggerMoment.StartOfBattle);
     }
 
@@ -134,6 +137,15 @@ public class TutorialManager : MonoBehaviour
         onTutorialClosedCallback = onComplete;
         IsTutorialActive = true;
 
+        if (nextButton != null)
+        {
+            nextButton.gameObject.SetActive(true);
+        }
+        if (finishButton != null)
+        {
+            finishButton.gameObject.SetActive(false);
+        }
+
         if (sequence.pauseGameWhileOpen && Time.timeScale > 0f)
         {
             previousTimeScale = Time.timeScale;
@@ -147,6 +159,11 @@ public class TutorialManager : MonoBehaviour
 
     private void ShowNextStep()
     {
+        if (currentSteps.Count== 1)
+        {
+            nextButton.gameObject.SetActive(false);
+            finishButton.gameObject.SetActive(true);
+        }
         if (currentSteps.Count == 0)
         {
             CloseTutorial();

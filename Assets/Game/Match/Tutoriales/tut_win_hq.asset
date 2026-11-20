@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 3d6370e5bcfb7e34795c78d56dc3eb65, type: 3}
   m_Name: tut_win_hq
   m_EditorClassIdentifier: Assembly-CSharp::TutorialSequence
   tutorialId: tut_win_hq
@@ -17,7 +17,5 @@ MonoBehaviour:
   pauseGameWhileOpen: 1
   showOnlyOnce: 1
   steps:
-  - speakerOrTitle: E
-    message: "\xA1Victoria decisiva!"
-  - speakerOrTitle: E
-    message: Has capturado el Cuartel General enemigo, poniendo fin al conflicto.
+  - speakerOrTitle: "Soldado n\xBA42070"
+    message: "Felicidades, has conquista el cuartel general de tus enemigos y completado el tutorial, que disfrutes con una buena destrucci\xF3n total del planeta"
