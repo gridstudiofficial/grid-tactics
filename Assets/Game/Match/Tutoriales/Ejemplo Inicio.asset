@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 3d6370e5bcfb7e34795c78d56dc3eb65, type: 3}
   m_Name: Ejemplo Inicio
   m_EditorClassIdentifier: Assembly-CSharp::TutorialSequence
   tutorialId: tut_intro
@@ -17,11 +17,9 @@ MonoBehaviour:
   pauseGameWhileOpen: 1
   showOnlyOnce: 1
   steps:
-  - speakerOrTitle: PEPIUR
-    message: LA PUTA MADRE ESCUBI
-  - speakerOrTitle: PIERDE
-    message: ESTO ES UNA PRUEBA
-  - speakerOrTitle: LA
-    message: JA FUNCIONA
-  - speakerOrTitle: CABEZA
-    message: "TWITTEA CO\xD1ETE"
+  - speakerOrTitle: "Soldado n\xBA 42069"
+    message: "Buenas jefe, soy el soldado n\xBA 42069 y mi trabajo es ense\xF1arte como va todo esto"
+  - speakerOrTitle: "Soldado n\xBA 42069"
+    message: "Lo primero es que para seleccionar tu ficha debes presionar F cuando el recuadro gris est\xE9 encima de ella, mueve el recuadro gris con WASD, cuando sepas a donde moverte presiona F de nuevo para moverte alli."
+  - speakerOrTitle: "Soldado n\xBA 42069"
+    message: "Con esta charlita terminada prueba a moverte a cualquier casilla que quieras, te recomendaria ir a la ciudad que la tienes a la derecha, no te preocupes por los turnos, tienes infinitos. Siento la impulsiva necesidad de rellenar este vacio de informaci\xF3n con palabrer\xEDa sin sentido como lo estoy haciendo ahora.\n\xBFPara que sigues leyendo? Dale al bot\xF3n de terminar y empieza a moverte y ve a la ciudad."

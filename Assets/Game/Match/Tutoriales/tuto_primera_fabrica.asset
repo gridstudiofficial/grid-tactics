@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 3d6370e5bcfb7e34795c78d56dc3eb65, type: 3}
   m_Name: tuto_primera_fabrica
   m_EditorClassIdentifier: Assembly-CSharp::TutorialSequence
   tutorialId: tuto_primera_fabrica
@@ -17,9 +17,11 @@ MonoBehaviour:
   pauseGameWhileOpen: 1
   showOnlyOnce: 1
   steps:
-  - speakerOrTitle: B
-    message: "\xA1Has tomado una f\xE1brica!"
-  - speakerOrTitle: B
-    message: "Sit\xFAa el cursor encima y pulsa F para desplegar nuevas unidades."
-  - speakerOrTitle: B
-    message: "Recuerda que tanto la unidad creada como la f\xE1brica entrar\xE1n en fatiga."
+  - speakerOrTitle: "Soldado n\xBA 42069"
+    message: "Felicidades, has conseguido una f\xE1brica"
+  - speakerOrTitle: "Soldado n\xBA 42069"
+    message: "Esta monada sirve para fabricar m\xE1s unidades, no salimos de los arboles, tampoco de la tierra, un momento, \xBFde donde venimos, que somos, tengo una crisis existencial? "
+  - speakerOrTitle: "Soldado n\xBA 42070"
+    message: "Buenas jefe, el anterior soldado se encuentra indispuesto, asi que ahora estoy yo, mira que bien, ya tienes la f\xE1brica conquistada "
+  - speakerOrTitle: "Soldado n\xBA 42070"
+    message: "Ahora que ya has conquistado tanto la ciudad como la f\xE1brica solo queda conquistar el cuartel general y habras ganado. "
