@@ -1768,7 +1768,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -441.56244, y: 276.75018}
+  m_AnchoredPosition: {x: -409, y: 253}
   m_SizeDelta: {x: 116.5, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &940112738
@@ -2268,6 +2268,7 @@ MonoBehaviour:
   hasActedThisRound: 0
   <unitID>k__BackingField: 0
   <movementType>k__BackingField: 1
+  <canMoveAndAttack>k__BackingField: 1
 --- !u!4 &995495309
 Transform:
   m_ObjectHideFlags: 0
@@ -2595,7 +2596,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 440, y: -261}
+  m_AnchoredPosition: {x: 425, y: -261}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1162327584

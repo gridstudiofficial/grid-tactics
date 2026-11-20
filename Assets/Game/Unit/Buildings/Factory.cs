@@ -29,7 +29,7 @@ public class Factory : Building, ISchedulable
     protected override void Start()
     {
         base.Start();
-        UpdateFactoryVisualState();
+        UpdateVisuals();
         if (TurnManager.Instance != null)
         {
             TurnManager.Instance.RegisterFactory(this);
@@ -39,17 +39,21 @@ public class Factory : Building, ISchedulable
     public void ReduceFatigue(int amount)
     {
         fatigue = Mathf.Max(0, fatigue - amount);
-        UpdateFactoryVisualState(); // Actualiza el color visualmente cada vez que baja la fatiga
+        UpdateVisuals();
     }
 
-    private void UpdateFactoryVisualState()
+    protected override void UpdateVisuals()
     {
-        // Buscamos el SpriteRenderer (asegúrate de que la clase Building o Factory tenga acceso al componente)
-        SpriteRenderer sr = GetComponent<SpriteRenderer>();
-        if (sr != null)
+        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null) return;
+
+        if (owner != null)
         {
-            // Si la fatiga es mayor a 0, se muestra oscura; si es 0, vuelve a su color normal
-            sr.color = fatigue > 0 ? fatiguedColor : normalColor;
+            spriteRenderer.color = owner.GetColor(fatigue > 0);
+        }
+        else
+        {
+            spriteRenderer.color = neutralColor;
         }
     }
 
@@ -86,6 +90,7 @@ public class Factory : Building, ISchedulable
                 newUnit.fatigue = 50;
                 newUnit.hasActedThisRound = true;
                 newUnit.SetExhaustedState(true);
+                newUnit.RefreshOwnerColor();
 
                 if (TurnManager.Instance != null)
                 {
@@ -94,7 +99,7 @@ public class Factory : Building, ISchedulable
 
                 // Aplicar fatiga/cooldown a la fábrica (ej. 30 turnos/unidades de fatiga)
                 fatigue = 30;
-                UpdateFactoryVisualState(); // Oscurecer inmediatamente al fabricar
+                UpdateVisuals(); // Oscurecer inmediatamente al fabricar
 
                 Debug.Log($"Unidad creada en {position}. Fábrica en cooldown.");
                 return newUnit;

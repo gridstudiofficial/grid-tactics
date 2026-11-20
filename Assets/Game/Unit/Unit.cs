@@ -1,9 +1,11 @@
-using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Game.Team.Player;
-using TMPro;
+using Game.Unit.Builgings;
 using Pausa;
+using TMPro;
+using UnityEngine;
 
 public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 {
@@ -11,7 +13,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     [field: SerializeField] public Vector2Int position { get; set; } = Vector2Int.zero;
     [field: SerializeField] public int movementRange { get; set; } = 3;
     [field: SerializeField] public string id { get; set; } = "";
-    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] public float moveSpeed = 5f;
     public bool canFly = false; // Define si ignora restricciones de terreno
 
     [Header("Visuales y UI Local")]
@@ -21,8 +23,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     [SerializeField] private TextMeshProUGUI hpTextDisplay; // Texto con la vida al lado de la ficha
 
     [Header("Colores de Estado")]
-    [SerializeField] private Color activeColor;
-    [SerializeField] private Color exhaustedColor = new Color(0.4f, 0.4f, 0.4f, 1f); // Oscuro al agotar turno
+    [SerializeField] private Color neutralUnitColor = Color.white;
 
     [field: SerializeField] public Player owner { get; set; }
     [field: SerializeField] public int fatigue { get; set; }
@@ -47,10 +48,47 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     [field: SerializeField] public int unitID { get; set; } = 0; // ID numérico para la matriz
     [field: SerializeField] public UnitMovementType movementType { get; set; } = UnitMovementType.Ground;
 
+    [Header("Restricciones de Combate y Movimiento")]
+    [field: SerializeField] public bool canMoveAndAttack { get; set; } = true; // True = Mueve y ataca | False = Mueve O ataca
+    public bool hasMovedThisTurn { get; private set; } = false;
+
     public void TakeDamage(int damage)
     {
         this.currentHP = Mathf.Max(0, this.currentHP - damage);
         UpdateHealthDisplay();
+
+        if (currentHP <= 0)
+        {
+            Die();
+        }
+    }
+
+    public void SetPendingFatigue(int value)
+    {
+        this.pendingFatigueCost = value;
+    }
+
+    private void Die()
+    {
+        Debug.Log($"Unidad {id} ha sido destruida.");
+
+        // Remover de la lista global del TurnManager
+        if (TurnManager.Instance != null)
+        {
+            TurnManager.Instance.allUnits.Remove(this);
+            TurnManager.Instance.activeUnits.Remove(this);
+        }
+
+        // Ocultar visuales y destruir objeto
+        Destroy(gameObject);
+
+        // Comprobar si con esta baja se cumple alguna condición de victoria
+        // (Asumiendo que tienes una lista de jugadores activos, puedes obtenerlos o pasar una lista genérica)
+        List<Player> players = FindObjectsOfType<Building>().Select(b => b.owner).Where(o => o != null).Distinct().ToList();
+        if (WinManager.Instance != null)
+        {
+            WinManager.Instance.CheckWinConditions(players);
+        }
     }
 
     public void Heal(int heal)
@@ -68,8 +106,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 
     protected virtual void Awake()
     {
-        activeColor = this.GetComponent<SpriteRenderer>().color;
-        exhaustedColor = new Color(activeColor.r * 0.4f, activeColor.g * 0.4f, activeColor.b * 0.4f, 1f);
+        
     }
 
     protected virtual void Start()
@@ -77,7 +114,9 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
         if (unitSpriteRenderer == null) unitSpriteRenderer = GetComponent<SpriteRenderer>();
         UpdateVisualPosition();
         UpdateHealthDisplay();
-        SetExhaustedState(false); // Color normal al inicio
+
+        bool isExhausted = fatigue > 0 || hasActedThisRound;
+        SetExhaustedState(isExhausted);
 
         if (TurnManager.Instance != null) TurnManager.Instance.RegisterUnit(this);
     }
@@ -92,10 +131,22 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 
     public void SetExhaustedState(bool exhausted)
     {
-        if (unitSpriteRenderer != null)
+        if (unitSpriteRenderer == null) return;
+
+        if (owner != null)
         {
-            unitSpriteRenderer.color = exhausted ? exhaustedColor : activeColor;
+            unitSpriteRenderer.color = owner.GetColor(exhausted);
         }
+        else
+        {
+            unitSpriteRenderer.color = exhausted ? new Color(0.4f, 0.4f, 0.4f, 1f) : neutralUnitColor;
+        }
+    }
+
+    public void RefreshOwnerColor()
+    {
+        bool isExhausted = fatigue > 0 || hasActedThisRound || !isMyTurn;
+        SetExhaustedState(isExhausted);
     }
 
     public void StartTurn()
@@ -108,6 +159,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     {
         initialPosition = position;
         initialFatigue = fatigue;
+        hasMovedThisTurn = false;
         CalculateValidMovesWithTerrain();
         ShowMovementRange();
     }
@@ -117,6 +169,11 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     public void ExecuteMovementTo(Vector2Int targetPos)
     {
         if (!isMyTurn || isMoving) return;
+
+        if (targetPos != initialPosition)
+        {
+            hasMovedThisTurn = true;
+        }
 
         List<Vector2Int> path = FindPathTo(targetPos);
         if (path.Count > 0)

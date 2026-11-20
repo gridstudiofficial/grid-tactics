@@ -23,6 +23,8 @@ public class TurnManager : MonoBehaviour
     // Añade esta lista y método en tu TurnManager:
     public List<Factory> allFactories = new List<Factory>();
 
+    public List<City> allCities = new List<City>();
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -35,11 +37,17 @@ public class TurnManager : MonoBehaviour
         // En tu juego real, llamarás a esto tras colocar las fichas
         //StartNextBatchOrReduce();
     }
+    public void RegisterCity(City city)
+    {
+        if (!allCities.Contains(city))
+        {
+            allCities.Add(city);
+        }
+    }
 
     public void RegisterFactory(Factory factory)
     {
-        if (!allFactories.Contains(factory))
-            allFactories.Add(factory);
+        if (!allFactories.Contains(factory)) { allFactories.Add(factory); OnActiveUnitChanged?.Invoke(null); }
     }
 
     public void RegisterUnit(Unit unit)
@@ -65,6 +73,13 @@ public class TurnManager : MonoBehaviour
                 {
                     factory.ReduceFatigue(1);
                 }
+                foreach (var city in allCities)
+                {
+                    if (city != null)
+                    {
+                        city.ReduceFatigue(1);
+                    }
+                }
             }
 
             foreach (var unit in allUnits)
@@ -80,10 +95,17 @@ public class TurnManager : MonoBehaviour
 
     public void SelectNextUnit()
     {
-        
         if (activeUnits.Count > 0)
         {
             activePlayer = activeUnits.First().owner;
+
+            // COMPROBACIÓN DE IA: Si el jugador activo es la IA, delegamos el turno al AIController
+            if (AIController.Instance != null && AIController.Instance.aiPlayer == activePlayer)
+            {
+                AIController.Instance.StartAITurn(activePlayer);
+                return; // Detenemos la selección manual de unidades humanas
+            }
+
             currentActiveUnit = activeUnits.First();
             currentActiveUnit.StartTurn();
 
@@ -97,7 +119,6 @@ public class TurnManager : MonoBehaviour
             StartNextBatchOrReduce();
         }
     }
-
 
 
     // Se llama cuando la unidad termina de moverse o atacar

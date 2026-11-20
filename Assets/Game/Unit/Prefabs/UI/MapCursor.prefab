@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingOrder: -1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.6313726}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.26666668}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -107,5 +107,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MapCursor
   position: {x: 0, y: 0}
   moveCooldown: 0.15
-  pathHighlightPrefab: {fileID: 0}
-  attackReticlePrefab: {fileID: 0}
+  pathHighlightPrefab: {fileID: 2295704994520921723, guid: 41b2f740a31348e49b654a7fc6c42d26, type: 3}
+  attackReticlePrefab: {fileID: 968315042029511691, guid: 517e27b604cbcbf49a4a3eb26ced493e, type: 3}
