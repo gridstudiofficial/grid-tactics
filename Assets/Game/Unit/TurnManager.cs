@@ -23,6 +23,8 @@ public class TurnManager : MonoBehaviour
     // Añade esta lista y método en tu TurnManager:
     public List<Factory> allFactories = new List<Factory>();
 
+    public List<City> allCities = new List<City>();
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -34,6 +36,13 @@ public class TurnManager : MonoBehaviour
         // Ejemplo: Empezar el combate al cargar la escena
         // En tu juego real, llamarás a esto tras colocar las fichas
         //StartNextBatchOrReduce();
+    }
+    public void RegisterCity(City city)
+    {
+        if (!allCities.Contains(city))
+        {
+            allCities.Add(city);
+        }
     }
 
     public void RegisterFactory(Factory factory)
@@ -63,6 +72,13 @@ public class TurnManager : MonoBehaviour
                 foreach (var factory in allFactories) // <-- Reducir fatiga de las fábricas
                 {
                     factory.ReduceFatigue(1);
+                }
+                foreach (var city in allCities)
+                {
+                    if (city != null)
+                    {
+                        city.ReduceFatigue(1);
+                    }
                 }
             }
 

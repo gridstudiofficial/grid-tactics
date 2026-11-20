@@ -884,6 +884,7 @@ MonoBehaviour:
   hasActedThisRound: 0
   <unitID>k__BackingField: 0
   <movementType>k__BackingField: 1
+  <canMoveAndAttack>k__BackingField: 1
 --- !u!1 &391681030
 GameObject:
   m_ObjectHideFlags: 0
@@ -1476,7 +1477,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9116322362840078941, guid: f0afeda9dca056a44895500829cd9e07, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 654
+      value: 806
       objectReference: {fileID: 0}
     - target: {fileID: 9116322362840078941, guid: f0afeda9dca056a44895500829cd9e07, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -1867,6 +1868,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 970810921}
+  - component: {fileID: 970810922}
   m_Layer: 0
   m_Name: AIController
   m_TagString: Untagged
@@ -1889,6 +1891,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &970810922
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 970810920}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32f3508d5f18a6342a12438f9780f56c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIController
+  aiPlayer: {fileID: 1854359289}
+  actionDelay: 1
 --- !u!1 &1047894107
 GameObject:
   m_ObjectHideFlags: 0
@@ -6180,7 +6196,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9116322362840078941, guid: f0afeda9dca056a44895500829cd9e07, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 669
+      value: 804
       objectReference: {fileID: 0}
     - target: {fileID: 9116322362840078941, guid: f0afeda9dca056a44895500829cd9e07, type: 3}
       propertyPath: m_AnchoredPosition.y

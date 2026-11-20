@@ -42,6 +42,10 @@ public class MapCursor : MonoBehaviour
 
     void Update()
     {
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive)
+        {
+            return;
+        }
         UpdateVisualPosition();
 
         switch (currentMode)

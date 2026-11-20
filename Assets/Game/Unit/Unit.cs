@@ -13,7 +13,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     [field: SerializeField] public Vector2Int position { get; set; } = Vector2Int.zero;
     [field: SerializeField] public int movementRange { get; set; } = 3;
     [field: SerializeField] public string id { get; set; } = "";
-    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] public float moveSpeed = 5f;
     public bool canFly = false; // Define si ignora restricciones de terreno
 
     [Header("Visuales y UI Local")]
@@ -23,8 +23,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     [SerializeField] private TextMeshProUGUI hpTextDisplay; // Texto con la vida al lado de la ficha
 
     [Header("Colores de Estado")]
-    [SerializeField] private Color activeColor;
-    [SerializeField] private Color exhaustedColor = new Color(0.4f, 0.4f, 0.4f, 1f); // Oscuro al agotar turno
+    [SerializeField] private Color neutralUnitColor = Color.white;
 
     [field: SerializeField] public Player owner { get; set; }
     [field: SerializeField] public int fatigue { get; set; }
@@ -107,8 +106,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 
     protected virtual void Awake()
     {
-        activeColor = this.GetComponent<SpriteRenderer>().color;
-        exhaustedColor = new Color(activeColor.r * 0.4f, activeColor.g * 0.4f, activeColor.b * 0.4f, 1f);
+        
     }
 
     protected virtual void Start()
@@ -116,7 +114,9 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
         if (unitSpriteRenderer == null) unitSpriteRenderer = GetComponent<SpriteRenderer>();
         UpdateVisualPosition();
         UpdateHealthDisplay();
-        SetExhaustedState(false); // Color normal al inicio
+
+        bool isExhausted = fatigue > 0 || hasActedThisRound;
+        SetExhaustedState(isExhausted);
 
         if (TurnManager.Instance != null) TurnManager.Instance.RegisterUnit(this);
     }
@@ -131,10 +131,22 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 
     public void SetExhaustedState(bool exhausted)
     {
-        if (unitSpriteRenderer != null)
+        if (unitSpriteRenderer == null) return;
+
+        if (owner != null)
         {
-            unitSpriteRenderer.color = exhausted ? exhaustedColor : activeColor;
+            unitSpriteRenderer.color = owner.GetColor(exhausted);
         }
+        else
+        {
+            unitSpriteRenderer.color = exhausted ? new Color(0.4f, 0.4f, 0.4f, 1f) : neutralUnitColor;
+        }
+    }
+
+    public void RefreshOwnerColor()
+    {
+        bool isExhausted = fatigue > 0 || hasActedThisRound || !isMyTurn;
+        SetExhaustedState(isExhausted);
     }
 
     public void StartTurn()

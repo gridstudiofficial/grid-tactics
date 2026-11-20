@@ -4,6 +4,7 @@ using System.Linq;
 using Game.Team.Player;
 using Game.Unit.Builgings;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class AIController : MonoBehaviour
 {
@@ -95,6 +96,17 @@ public class AIController : MonoBehaviour
 
             if (path.Count > 0)
             {
+                foreach (Vector2Int step in path)
+                {
+                    Vector3 targetWorldPos = new Vector3(step.x, step.y, 0f);
+                    while (Vector3.Distance(transform.position, targetWorldPos) > 0.01f)
+                    {
+                        transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, unit.moveSpeed * Time.deltaTime);
+                        yield return null;
+                    }
+                    transform.position = targetWorldPos;
+                    unit.position = step;
+                }
                 unit.position = path.Last();
                 unit.transform.position = new Vector3(unit.position.x, unit.position.y, 0f);
 
