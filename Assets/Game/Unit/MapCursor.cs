@@ -19,11 +19,14 @@ public class MapCursor : MonoBehaviour
 
     [Header("Estados del Cursor")]
     private Unit activeUnit = null;
-    private CursorMode currentMode = CursorMode.FreeExploration;
+    public CursorMode currentMode = CursorMode.FreeExploration;
     private AttackAction currentAttackAction;
 
     private List<Unit> currentEnemiesInRange = new List<Unit>();
     private int selectedEnemyIndex = 0;
+
+    public Vector2Int fallbackMinBounds = new Vector2Int(-5,-5);
+    public Vector2Int fallbackMaxBounds = new Vector2Int(-5,-5);
 
     public enum CursorMode
     {
@@ -34,6 +37,10 @@ public class MapCursor : MonoBehaviour
         InFactoryMenu // Estado activo al interactuar con la fábrica
     }
 
+    private void Start()
+    {
+        position = ClampToMapBounds(position);
+    }
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -44,6 +51,16 @@ public class MapCursor : MonoBehaviour
     {
         if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive)
         {
+            return;
+        }
+
+        bool anyUnitPlayingAttackSound =
+        (activeUnit != null && activeUnit.IsPlayingAttackSound) ||
+        (TurnManager.Instance != null && TurnManager.Instance.allUnits.Any(u => u != null && u.IsPlayingAttackSound));
+
+        if (anyUnitPlayingAttackSound)
+        {
+            UpdateVisualPosition();
             return;
         }
         UpdateVisualPosition();
@@ -86,7 +103,7 @@ public class MapCursor : MonoBehaviour
         Vector2Int dir = GetInputDirection();
         if (dir != Vector2Int.zero && Time.time >= nextMoveTime)
         {
-            position += dir;
+            position = ClampToMapBounds(position + dir);
             nextMoveTime = Time.time + moveCooldown;
         }
     }
@@ -344,4 +361,27 @@ public class MapCursor : MonoBehaviour
         ClearPathVisuals();
         currentMode = CursorMode.FreeExploration;
     }
+
+    private Vector2Int ClampToMapBounds(Vector2Int targetPos)
+    {
+        Vector2Int minBounds = fallbackMinBounds;
+        Vector2Int maxBounds = fallbackMaxBounds;
+
+        if (MapCameraController.Instance != null)
+        {
+            minBounds = MapCameraController.Instance.MapMinBounds;
+            maxBounds = MapCameraController.Instance.MapMaxBounds;
+        }
+
+        int clampedX = Mathf.Clamp(targetPos.x, minBounds.x, maxBounds.x);
+        int clampedY = Mathf.Clamp(targetPos.y, minBounds.y, maxBounds.y);
+        return new Vector2Int(clampedX, clampedY);
+    }
+
+    public void MoveToPosition(Vector2Int newGridPos)
+    {
+        position = ClampToMapBounds(newGridPos);
+        UpdateVisualPosition();
+    }
+
 }

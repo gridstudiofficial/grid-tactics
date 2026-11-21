@@ -59,6 +59,10 @@ public class AIController : MonoBehaviour
                 .FirstOrDefault(u => u.owner == aiPlayer && !u.hasActedThisRound && u.fatigue <= 0);
 
             if (unit == null) break; // Si no quedan unidades activas de la IA, terminamos el turno
+            if (MapCameraController.Instance != null)
+            {
+                MapCameraController.Instance.FocusOnUnit(unit);
+            }
 
             Debug.Log($"IA evaluando unidad: {unit.id}");
 

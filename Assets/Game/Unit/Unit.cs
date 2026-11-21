@@ -25,6 +25,13 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     [Header("Colores de Estado")]
     [SerializeField] private Color neutralUnitColor = Color.white;
 
+    [Header("Audio de Combate")]
+    [SerializeField] private AudioClip attackSoundClip;
+    [Range(0f, 1f)]
+    [SerializeField] private float attackSoundVolume = 0.2f;
+
+    public bool IsPlayingAttackSound { get; private set; }
+
     [field: SerializeField] public Player owner { get; set; }
     [field: SerializeField] public int fatigue { get; set; }
     public int currentHP { get; set; } = 10;
@@ -111,6 +118,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 
     protected virtual void Start()
     {
+
         if (unitSpriteRenderer == null) unitSpriteRenderer = GetComponent<SpriteRenderer>();
         UpdateVisualPosition();
         UpdateHealthDisplay();
@@ -153,6 +161,16 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     {
         isMyTurn = true;
         SetExhaustedState(false);
+
+        if (MapCursor.Instance != null)
+        {
+            MapCursor.Instance.MoveToPosition(position);
+        }
+
+        if (MapCameraController.Instance != null)
+        {
+            MapCameraController.Instance.FocusOnUnit(this);
+        }
     }
 
     public void BeginMovementSelection()
@@ -195,6 +213,10 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     private IEnumerator MoveAlongPath(List<Vector2Int> path)
     {
         isMoving = true;
+        if (MapCameraController.Instance != null)
+        {
+            MapCameraController.Instance.FollowUnit(this);
+        }
         foreach (Vector2Int step in path)
         {
             Vector3 targetWorldPos = new Vector3(step.x, step.y, 0f);
@@ -205,6 +227,10 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
             }
             transform.position = targetWorldPos;
             position = step;
+        }
+        if (MapCameraController.Instance != null)
+        {
+            MapCameraController.Instance.StopFollowingUnit();
         }
         isMoving = false;
         OpenActionMenu();
@@ -385,5 +411,23 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     private void UpdateVisualPosition()
     {
         transform.position = new Vector3(position.x, position.y, 0f);
+    }
+
+    public float PlayAttackSound()
+    {
+        if (attackSoundClip == null) return 0f;
+
+        if (MusicManager.Instance == null || MusicManager.Instance.audioSource == null)
+        {
+            return 0f;
+        }
+
+        MusicManager.Instance.PlaySfx(attackSoundClip, attackSoundVolume);
+        return attackSoundClip.length;
+    }
+
+    public void SetPlayingAttackSound(bool playing)
+    {
+        IsPlayingAttackSound = playing;
     }
 }

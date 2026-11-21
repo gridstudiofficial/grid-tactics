@@ -196,6 +196,9 @@ MonoBehaviour:
   unitSpriteRenderer: {fileID: 4190284671475520579}
   hpTextDisplay: {fileID: 4959504045939515365}
   neutralUnitColor: {r: 1, g: 1, b: 1, a: 1}
+  attackSoundClip: {fileID: 8300000, guid: 6e28b3b64fcb90644b3f2c78d0198ebe, type: 3}
+  attackSoundVolume: 0.2
+  unitAudioSource: {fileID: 0}
   <owner>k__BackingField: {fileID: 0}
   <fatigue>k__BackingField: 5
   <isMyTurn>k__BackingField: 0
@@ -252,12 +255,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -6538878457523811942, guid: 19747555c36fdae47bd2e2d6ddf3130f, type: 3}
-  m_Color: {r: 1, g: 0, b: 0.10945022, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 19747555c36fdae47bd2e2d6ddf3130f, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.16, y: 0.16}
+  m_Size: {x: 0.5, y: 0.5}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -301,8 +304,8 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.16, y: 0.16}
-    newSize: {x: 0.16, y: 0.16}
+    oldSize: {x: 0.2, y: 0.2}
+    newSize: {x: 0.5, y: 0.5}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
