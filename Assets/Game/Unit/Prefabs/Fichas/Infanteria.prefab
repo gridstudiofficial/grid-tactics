@@ -187,7 +187,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Infantry
   <position>k__BackingField: {x: 0, y: 0}
-  <movementRange>k__BackingField: 3
+  <movementRange>k__BackingField: 6
   <id>k__BackingField: Rojo
   moveSpeed: 5
   canFly: 0
@@ -195,14 +195,14 @@ MonoBehaviour:
   pathHighlightPrefab: {fileID: 2295704994520921723, guid: 41b2f740a31348e49b654a7fc6c42d26, type: 3}
   unitSpriteRenderer: {fileID: 4190284671475520579}
   hpTextDisplay: {fileID: 4959504045939515365}
-  activeColor: {r: 1, g: 1, b: 1, a: 1}
-  exhaustedColor: {r: 0.4, g: 0.4, b: 0.4, a: 1}
+  neutralUnitColor: {r: 1, g: 1, b: 1, a: 1}
   <owner>k__BackingField: {fileID: 0}
   <fatigue>k__BackingField: 5
   <isMyTurn>k__BackingField: 0
   hasActedThisRound: 0
   <unitID>k__BackingField: 0
   <movementType>k__BackingField: 0
+  <canMoveAndAttack>k__BackingField: 1
 --- !u!212 &4190284671475520579
 SpriteRenderer:
   serializedVersion: 3

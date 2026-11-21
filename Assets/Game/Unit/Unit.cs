@@ -279,7 +279,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 
                 if (canPass)
                 {
-                    int newCost = costSoFar[current] + 1; // Coste 1 por casilla transitable
+                    int newCost = costSoFar[current] + MapTerrain.Instance.GetMovementCostForType(movementType, terrain) ; // Coste 1 por casilla transitable
 
                     if (newCost <= movementRange)
                     {

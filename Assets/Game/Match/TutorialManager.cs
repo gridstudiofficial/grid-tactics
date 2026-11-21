@@ -175,7 +175,7 @@ public class TutorialManager : MonoBehaviour
 
         if (titleText != null) titleText.text = step.speakerOrTitle;
         if (bodyText != null) bodyText.text = step.message;
-        if (stepCounterText != null) stepCounterText.text = $"{currentIndex} / {totalStepsInCurrentSequence}";
+        if (stepCounterText != null) stepCounterText.text = $"{currentIndex}/{totalStepsInCurrentSequence}";
     }
 
     public void AdvanceOrClose()

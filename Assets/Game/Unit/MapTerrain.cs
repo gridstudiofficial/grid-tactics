@@ -78,7 +78,7 @@ public class MapTerrain : MonoBehaviour
         return GetMovementCostForType(unitMovementType, terrain);
     }
 
-    private int GetMovementCostForType(UnitMovementType unitType, TerrainType terrain)
+    public int GetMovementCostForType(UnitMovementType unitType, TerrainType terrain)
     {
         if (tilemap == null) return 1;
 
