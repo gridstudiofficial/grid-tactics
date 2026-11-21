@@ -84,8 +84,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  m_Color: {r: 0.87012684, g: 1, b: 0, a: 1}
+  m_Sprite: {fileID: 21300000, guid: ae113a473fd16e843913939709891189, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -162,14 +162,17 @@ MonoBehaviour:
   pathHighlightPrefab: {fileID: 2295704994520921723, guid: 41b2f740a31348e49b654a7fc6c42d26, type: 3}
   unitSpriteRenderer: {fileID: 3780607846036213739}
   hpTextDisplay: {fileID: 6350508979573990494}
-  activeColor: {r: 1, g: 1, b: 1, a: 1}
-  exhaustedColor: {r: 0.4, g: 0.4, b: 0.4, a: 1}
+  neutralUnitColor: {r: 1, g: 1, b: 1, a: 1}
+  attackSoundClip: {fileID: 8300000, guid: 25f1e6d3157bf5047b7ef429537f926f, type: 3}
+  attackSoundVolume: 0.2
+  unitAudioSource: {fileID: 0}
   <owner>k__BackingField: {fileID: 0}
   <fatigue>k__BackingField: 20
   <isMyTurn>k__BackingField: 0
   hasActedThisRound: 0
   <unitID>k__BackingField: 1
   <movementType>k__BackingField: 0
+  <canMoveAndAttack>k__BackingField: 1
 --- !u!1 &1441370443330781910
 GameObject:
   m_ObjectHideFlags: 0

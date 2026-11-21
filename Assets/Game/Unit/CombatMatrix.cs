@@ -12,8 +12,9 @@ public static class CombatMatrix
     private static readonly int[,] damageTable = new int[,]
     {
         // Defensor: ID 0 (Infantería) | Defensor: ID 1 (Vehículo Pesado)
-        { 5, 2 }, // Atacante ID 0 (Infantería)
-        { 8, 4 }  // Atacante ID 1 (Vehículo Pesado)
+        { 5, 2, 1 }, // Atacante ID 0 (Infantería)
+        { 8, 4, 2 }, // Atacante ID 1 (Vehículo Pesado)
+        { 8, 6, 5}   // Atacante ID 2 (Vehículo Pesado)
     };
 
     public static int GetDamage(int attackerID, int defenderID)
