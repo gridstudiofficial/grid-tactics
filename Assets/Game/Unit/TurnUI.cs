@@ -80,7 +80,7 @@ public class TurnUI : MonoBehaviour
                 TextMeshProUGUI label = item.GetComponentInChildren<TextMeshProUGUI>();
                 if (label != null)
                 {
-                    label.text = $"{unit.id}    {unit.fatigue}";
+                    label.text = $"{unit.id}: {unit.fatigue}";
                 }
                 if(sr != null)
                 {
