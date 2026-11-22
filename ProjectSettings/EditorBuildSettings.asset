@@ -20,10 +20,11 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/PantallaMarketing.unity
     guid: aa7a1e1c947a78a45890609aaea2ab9c
-    path: Assets/Scenes/Pruebas de niveles/pierdolacabeza.unity
-    guid: 0b06afce172bfb4409b6336855b756b3
   - enabled: 1
     path: Assets/Scenes/Pruebas de niveles/Tutorial 3.unity
     guid: 6dcc5c0922265714e89f03860f70d429
+  - enabled: 1
+    path: Assets/Scenes/Pruebas de niveles/pierdolacabeza.unity
+    guid: 0b06afce172bfb4409b6336855b756b3
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
