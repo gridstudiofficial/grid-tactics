@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 3d6370e5bcfb7e34795c78d56dc3eb65, type: 3}
   m_Name: tut_win_eliminarion
   m_EditorClassIdentifier: Assembly-CSharp::TutorialSequence
   tutorialId: tut_win_elimination
@@ -17,7 +17,5 @@ MonoBehaviour:
   pauseGameWhileOpen: 1
   showOnlyOnce: 1
   steps:
-  - speakerOrTitle: D
-    message: "\xA1Victoria por aniquilaci\xF3n!"
-  - speakerOrTitle: D
-    message: Has eliminado todas las fuerzas enemigas desplegadas en el campo de batalla.
+  - speakerOrTitle: "Operario n\xBA91167"
+    message: "Muy bien, el tanque enemigo ha caido y con eso concluye esta leccion sobre el uso de tanques e infanter\xEDa contra otras unidades"
