@@ -63,7 +63,7 @@ MonoBehaviour:
   <isMyTurn>k__BackingField: 0
   hasActedThisRound: 0
   <unitID>k__BackingField: 0
-  <movementType>k__BackingField: 0
+  <movementType>k__BackingField: 1
   <canMoveAndAttack>k__BackingField: 1
 --- !u!212 &705075070956752683
 SpriteRenderer:

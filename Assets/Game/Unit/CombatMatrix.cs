@@ -1,6 +1,7 @@
 public enum UnitMovementType
 {
     Ground,
+    Motorize,
     Water,
     Air
 }

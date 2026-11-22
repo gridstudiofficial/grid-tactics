@@ -23,6 +23,7 @@ public struct TileTerrainData
     public int costGround;           // 999 = Impasable
     public int costWater;
     public int costAir;
+    public int costMotorize;
 }
 
 public class MapTerrain : MonoBehaviour
@@ -91,6 +92,7 @@ public class MapTerrain : MonoBehaviour
                 switch (unitType)
                 {
                     case UnitMovementType.Ground: return data.costGround;
+                    case UnitMovementType.Motorize: return data.costMotorize;
                     case UnitMovementType.Water: return data.costWater;
                     case UnitMovementType.Air: return data.costAir;
                 }
