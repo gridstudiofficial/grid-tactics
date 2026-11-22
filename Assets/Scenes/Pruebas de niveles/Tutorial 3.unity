@@ -1521,9 +1521,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 39fa8b3c41dc78c4f92d800d80c537c0, type: 2}
   - {fileID: 11400000, guid: c5e982686d3952c419824ca6ac9fe105, type: 2}
   endBattleTutorials:
-  - {fileID: 11400000, guid: 7611d28b54bbe8841b1380a87ad2ea23, type: 2}
-  - {fileID: 11400000, guid: 0dab784f3d7e6ee4fbe0fce34cbd1ccf, type: 2}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: 3b4784daa323e0342afa7691a4f9c7ae, type: 2}
 --- !u!4 &763016651
 Transform:
   m_ObjectHideFlags: 0
