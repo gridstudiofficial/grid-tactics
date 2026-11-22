@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d6370e5bcfb7e34795c78d56dc3eb65, type: 3}
+  m_Name: "TutoMonta\xF1a"
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialSequence
+  tutorialId: tut_intro
+  moment: 0
+  pauseGameWhileOpen: 1
+  showOnlyOnce: 1
+  steps:
+  - speakerOrTitle: "Operario n\xBA91167"
+    message: Buenas fiera, aqui te toca aprender como nos movemos los tanques y el resto por distintos terrenos
+  - speakerOrTitle: "Operario n\xBA91167"
+    message: "Los tanques nos movemos fatal por la arena y somos incapaces de atravesar monta\xF1as"
+  - speakerOrTitle: "Soldado n\xBA42070"
+    message: "Por otro lado, nosotros los de a pie nos movemos incluso mejor en la arena y algo peor en las monta\xF1as"
+  - speakerOrTitle: "Soldado n\xBA42070"
+    message: Usanos a los dos de a pie para encerrar a nuestro enemigo en el paso estrecho
+  - speakerOrTitle: "Operario n\xBA 91167"
+    message: Y puedes usarme a mi como carnada, asegurate de que este en la arena la mayor parte del tiempo
+  - speakerOrTitle: "Artillero n\xBA135"
+    message: "Para que yo pueda atacar mi objetivo debe estar a 5 casillas o menos de mi posicion y que no est\xE9 cuerpo a cuerpo "
+  - speakerOrTitle: "Artillero n\xBA135"
+    message: "Y si quieres que ataque no podr\xE9 moverme, piensa bien como usarme"
