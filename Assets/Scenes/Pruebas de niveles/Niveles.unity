@@ -882,7 +882,7 @@ PrefabInstance:
     - target: {fileID: 7280696660247676913, guid: 865126053bc1aa240bb0fd77ab584375, type: 3}
       propertyPath: <owner>k__BackingField
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1294957683}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1421,25 +1421,25 @@ MonoBehaviour:
     costGround: 2
     costWater: 999
     costAir: 1
-    costMotorize: 0
+    costMotorize: 1
   - tileAsset: {fileID: 11400000, guid: 75237fa304688c04fbc242aefafb0769, type: 2}
     terrainType: 2
     costGround: 3
     costWater: 999
     costAir: 1
-    costMotorize: 0
+    costMotorize: 999
   - tileAsset: {fileID: 11400000, guid: dced4f08b3b5d184985dd263ecf939d5, type: 2}
     terrainType: 3
     costGround: 1
     costWater: 999
     costAir: 1
-    costMotorize: 0
+    costMotorize: 3
   - tileAsset: {fileID: 11400000, guid: 3b3dcb27e8e6627469f071be0dfb777d, type: 2}
     terrainType: 1
     costGround: 999
     costWater: 1
     costAir: 1
-    costMotorize: 0
+    costMotorize: 999
 --- !u!114 &780081926
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1483,7 +1483,9 @@ MonoBehaviour:
   winByElimination: 0
   winByMajorityBuildings: 0
   winByHeadquartersCapture: 1
-  activePlayers: []
+  activePlayers:
+  - {fileID: 1294957683}
+  - {fileID: 885134650}
 --- !u!114 &780081929
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3203,6 +3205,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7611d28b54bbe8841b1380a87ad2ea23, type: 2}
   - {fileID: 11400000, guid: 0dab784f3d7e6ee4fbe0fce34cbd1ccf, type: 2}
   - {fileID: 11400000, guid: d4a918d792577764dbbbca4a5b989ba7, type: 2}
+  - {fileID: 11400000, guid: d0199f40c108e2446897851598a9bb8f, type: 2}
 --- !u!4 &1304418206
 Transform:
   m_ObjectHideFlags: 0

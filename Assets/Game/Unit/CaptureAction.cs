@@ -42,7 +42,7 @@ public class CaptureAction : UnitAction
             else
             {
                 building.SetOwner(unit.owner);
-                Debug.Log($"¡La unidad {unit.id} conquistó el edificio en {unit.position} para {unit.owner.Name}!");
+                //Debug.Log($"¡La unidad {unit.id} conquistó el edificio en {unit.position} para {unit.owner.Name}!");
 
                 // Tutorial intermedio: Primera fábrica capturada por el jugador
                 if (isHumanPlayer && building is Factory && TutorialManager.Instance != null)

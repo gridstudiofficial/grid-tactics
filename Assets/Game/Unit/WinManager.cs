@@ -26,6 +26,8 @@ public class WinManager : MonoBehaviour
     private List<Building> allBuildings = new List<Building>();
     private List<Headquarters> allHQs = new List<Headquarters>();
 
+    private bool gameEnded = false;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -52,7 +54,7 @@ public class WinManager : MonoBehaviour
 
     public void CheckWinConditions()
     {
-        if (activePlayers == null) return;
+        if (gameEnded || activePlayers == null) return;
 
         foreach (var player in activePlayers)
         {
@@ -61,7 +63,15 @@ public class WinManager : MonoBehaviour
             WinReason reason = EvaluatePlayerWin(player);
             if (reason != WinReason.None)
             {
-                TriggerWin(player, reason);
+                bool isHumanPlayer = AIController.Instance == null || player != AIController.Instance.aiPlayer;
+                if (isHumanPlayer)
+                {
+                    TriggerWin(player, reason);
+                }
+                else
+                {
+                    TriggerLoss(player, reason);
+                }
                 break;
             }
         }
@@ -69,18 +79,25 @@ public class WinManager : MonoBehaviour
 
     private WinReason EvaluatePlayerWin(Player player)
     {
-        // CONDICIÓN 1: El enemigo no tiene más unidades desplegadas
+        // CONDICIÓN 1: El bando rival no tiene más unidades desplegadas
         if (winByElimination && TurnManager.Instance != null)
         {
-            var opponentUnits = TurnManager.Instance.allUnits.Where(u => u != null && u.owner != player).ToList();
-            if (TurnManager.Instance.allUnits.Count > 0 && opponentUnits.Count == 0)
+            var opponentUnits = TurnManager.Instance.allUnits
+                .Where(u => u != null && u.owner != null && u.owner != player)
+                .ToList();
+
+            var playerUnits = TurnManager.Instance.allUnits
+                .Where(u => u != null && u.owner == player)
+                .ToList();
+
+            if (playerUnits.Count > 0 && opponentUnits.Count == 0)
             {
-                Debug.Log($"¡{player.Name} gana! No quedan unidades enemigas.");
+                Debug.Log($"¡{player.Name} cumple eliminación! No quedan unidades rivales.");
                 return WinReason.Elimination;
             }
         }
 
-        // CONDICIÓN 2: Ha conquistado la mitad + 1 de los edificios totales del mapa
+        // CONDICIÓN 2: Mitad + 1 de los edificios totales del mapa
         if (winByMajorityBuildings)
         {
             int totalBuildings = allBuildings.Count;
@@ -91,20 +108,20 @@ public class WinManager : MonoBehaviour
 
                 if (playerOwnedBuildings >= requiredBuildings)
                 {
-                    Debug.Log($"¡{player.Name} gana! Ha conquistado {playerOwnedBuildings} de {totalBuildings} edificios.");
+                    Debug.Log($"¡{player.Name} cumple mayoría de edificios ({playerOwnedBuildings}/{totalBuildings})!");
                     return WinReason.MajorityBuildings;
                 }
             }
         }
 
-        // CONDICIÓN 3: Ha conquistado el Cuartel General (HQ) del enemigo
+        // CONDICIÓN 3: Captura del Cuartel General (HQ) rival
         if (winByHeadquartersCapture)
         {
             foreach (var hq in allHQs)
             {
                 if (hq != null && hq.originalOwner != null && hq.originalOwner != player && hq.owner == player)
                 {
-                    Debug.Log($"¡{player.Name} gana! Ha conquistado el Cuartel General de {hq.originalOwner.Name}.");
+                    Debug.Log($"¡{player.Name} ha capturado el HQ de {hq.originalOwner.Name}!");
                     return WinReason.HeadquartersCapture;
                 }
             }
@@ -115,9 +132,9 @@ public class WinManager : MonoBehaviour
 
     private void TriggerWin(Player winner, WinReason reason)
     {
-        Debug.Log($"<color=yellow>========================================</color>");
-        Debug.Log($"<color=green> ¡FIN DE LA PARTIDA! GANADOR: {winner.Name} ({reason}) </color>");
-        Debug.Log($"<color=yellow>========================================</color>");
+        gameEnded = true;
+        Debug.Log($"<color=green>¡VICTORIA! Ganador: {winner.Name} ({reason})</color>");
+        Time.timeScale = 0f;
 
         string tutorialId = reason switch
         {
@@ -137,6 +154,32 @@ public class WinManager : MonoBehaviour
         else
         {
             Time.timeScale = 0f;
+        }
+    }
+
+    private void TriggerLoss(Player winnerOpponent, WinReason reason)
+    {
+        gameEnded = true;
+        Debug.Log($"<color=red>¡DERROTA! Ha ganado {winnerOpponent.Name} por {reason}</color>");
+
+        string tutorialId = reason switch
+        {
+            WinReason.Elimination => "tut_lose_elimination",
+            WinReason.MajorityBuildings => "tut_lose_buildings",
+            WinReason.HeadquartersCapture => "tut_lose_hq",
+            _ => string.Empty
+        };
+
+        if (TutorialManager.Instance != null && !string.IsNullOrEmpty(tutorialId))
+        {
+            TutorialManager.Instance.PlayById(tutorialId, () =>
+            {
+                TutorialManager.Instance.GoToStartScene();
+            });
+        }
+        else if (TutorialManager.Instance != null)
+        {
+            TutorialManager.Instance.GoToStartScene();
         }
     }
 }

@@ -72,7 +72,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 
     public void SetPendingFatigue(int value)
     {
-        this.pendingFatigueCost = value;
+        this.pendingFatigueCost = value + TurnManager.Instance.allUnits.First().fatigue;
     }
 
     private void Die()

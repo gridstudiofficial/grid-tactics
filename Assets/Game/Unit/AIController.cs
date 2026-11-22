@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Game.Team.Player;
 using Game.Unit.Builgings;
+using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -95,6 +96,7 @@ public class AIController : MonoBehaviour
             List<Building> targetBuildings = FindObjectsOfType<Building>().Where(b => b.owner != aiPlayer).ToList();
             List<Unit> visibleEnemies = TurnManager.Instance.allUnits.Where(u => u.owner != aiPlayer).ToList();
 
+            unit.SetPendingFatigue(10);
             Vector2Int bestDestination = FindBestMovementTarget(unit, targetBuildings, visibleEnemies);
             unit.CalculateValidMovesWithTerrain();
             List<Vector2Int> path = unit.FindPathTo(bestDestination);
@@ -112,8 +114,8 @@ public class AIController : MonoBehaviour
                     transform.position = targetWorldPos;
                     unit.position = step;
                 }
+                if (unit == null) break;
                 unit.position = path.Last();
-                unit.SetPendingFatigue(10 + (path.Count * 5));
                 unit.transform.position = new Vector3(unit.position.x, unit.position.y, 0f);
 
                 Building buildingAfterMove = FindObjectsOfType<Building>().FirstOrDefault(b => b.position == unit.position);
@@ -135,13 +137,11 @@ public class AIController : MonoBehaviour
                 }
                 else
                 {
-                    unit.SetPendingFatigue(10);
                     unit.ExecuteWaitAction();
                 }
             }
             else
             {
-                unit.SetPendingFatigue(15);
                 unit.ExecuteWaitAction();
             }
 
