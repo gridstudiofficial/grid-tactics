@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class TutorialManager : MonoBehaviour
 {
@@ -15,6 +16,10 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI stepCounterText;
     [SerializeField] private Button nextButton;
     [SerializeField] private Button finishButton;
+
+    [Header("Botón al Finalizar Tutorial Final")]
+    [SerializeField] private Button returnToStartButton;
+    [SerializeField] private string startSceneName = "MainMenu";
 
     [Header("Secuencias por Momento")]
     [SerializeField] private List<TutorialSequence> startTutorials = new List<TutorialSequence>();
@@ -29,6 +34,7 @@ public class TutorialManager : MonoBehaviour
     private float previousTimeScale = 1f;
     private Action onTutorialClosedCallback;
     private HashSet<string> shownTutorialIds = new HashSet<string>();
+    private TutorialSequence activeSequence;
 
     private void Awake()
     {
@@ -37,16 +43,23 @@ public class TutorialManager : MonoBehaviour
 
         if (tutorialPanel != null) tutorialPanel.SetActive(false);
 
-        if (nextButton != null || finishButton != null)
+        if (returnToStartButton != null)
+        {
+            returnToStartButton.gameObject.SetActive(false);
+            returnToStartButton.onClick.AddListener(GoToStartScene);
+        }
+
+        if (nextButton != null)
         {
             nextButton.onClick.AddListener(AdvanceOrClose);
-            finishButton.onClick.AddListener(AdvanceOrClose);
         }
+
     }
 
     private void Start()
     {
         finishButton.gameObject.SetActive(false);
+        finishButton.onClick.AddListener(AdvanceOrClose);
         TriggerMoment(TutorialTriggerMoment.StartOfBattle);
     }
 
@@ -54,7 +67,10 @@ public class TutorialManager : MonoBehaviour
     {
         if (!IsTutorialActive) return;
 
-        // Usar unscaledDeltaTime / GetKeyDown funciona aunque Time.timeScale sea 0
+        // Si el botón de ir al inicio ya está visible al final del último texto, evitamos cerrar el panel por accidente
+        bool isOnFinalEndStep = IsEndOfBattleSequence(activeSequence) && currentSteps.Count == 0;
+        if (isOnFinalEndStep) return;
+
         if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
         {
             AdvanceOrClose();
@@ -63,6 +79,12 @@ public class TutorialManager : MonoBehaviour
         {
             CloseTutorial();
         }
+    }
+
+    private bool IsEndOfBattleSequence(TutorialSequence sequence)
+    {
+        if (sequence == null) return false;
+        return sequence.moment == TutorialTriggerMoment.EndOfBattle || endBattleTutorials.Contains(sequence);
     }
 
     public void TriggerMoment(TutorialTriggerMoment moment, Action onComplete = null)
@@ -122,6 +144,13 @@ public class TutorialManager : MonoBehaviour
             return;
         }
 
+        activeSequence = sequence;
+
+        if (returnToStartButton != null)
+        {
+            returnToStartButton.gameObject.SetActive(false);
+        }
+
         if (sequence.showOnlyOnce)
         {
             shownTutorialIds.Add(sequence.tutorialId);
@@ -137,14 +166,6 @@ public class TutorialManager : MonoBehaviour
         onTutorialClosedCallback = onComplete;
         IsTutorialActive = true;
 
-        if (nextButton != null)
-        {
-            nextButton.gameObject.SetActive(true);
-        }
-        if (finishButton != null)
-        {
-            finishButton.gameObject.SetActive(false);
-        }
 
         if (sequence.pauseGameWhileOpen && Time.timeScale > 0f)
         {
@@ -154,12 +175,19 @@ public class TutorialManager : MonoBehaviour
         }
 
         if (tutorialPanel != null) tutorialPanel.SetActive(true);
+        if (nextButton != null)
+        {
+            nextButton.gameObject.SetActive(true);
+        }
+        if (finishButton != null)
+        {
+            finishButton.gameObject.SetActive(false);
+        }
         ShowNextStep();
     }
-
-    private void ShowNextStep()
+private void ShowNextStep()
     {
-        if (currentSteps.Count== 1)
+        if (currentSteps.Count == 1)
         {
             nextButton.gameObject.SetActive(false);
             finishButton.gameObject.SetActive(true);
@@ -175,7 +203,24 @@ public class TutorialManager : MonoBehaviour
 
         if (titleText != null) titleText.text = step.speakerOrTitle;
         if (bodyText != null) bodyText.text = step.message;
-        if (stepCounterText != null) stepCounterText.text = $"{currentIndex}/{totalStepsInCurrentSequence}";
+        if (stepCounterText != null) stepCounterText.text = $"{currentIndex} / {totalStepsInCurrentSequence}";
+
+        // Mostrar el botón de ir al inicio solo cuando se muestra el último texto de un tutorial final
+        bool isLastStepOfEndTutorial = (currentSteps.Count == 0) && IsEndOfBattleSequence(activeSequence);
+        if (returnToStartButton != null)
+        {
+            returnToStartButton.gameObject.SetActive(isLastStepOfEndTutorial);
+            if(isLastStepOfEndTutorial)
+            {
+                finishButton.onClick.AddListener(GoToStartScene);
+            }
+        }
+
+        // Opcional: ocultar el botón "Siguiente" en el último paso final si solo quieres que usen el botón de inicio
+        if (nextButton != null)
+        {
+            nextButton.gameObject.SetActive(!isLastStepOfEndTutorial);
+        }
     }
 
     public void AdvanceOrClose()
@@ -197,8 +242,11 @@ public class TutorialManager : MonoBehaviour
         if (!IsTutorialActive) return;
 
         IsTutorialActive = false;
+        activeSequence = null;
         currentSteps.Clear();
 
+        if (returnToStartButton != null) returnToStartButton.gameObject.SetActive(false);
+        if (nextButton != null) nextButton.gameObject.SetActive(true);
         if (tutorialPanel != null) tutorialPanel.SetActive(false);
 
         if (pausedByTutorial)
@@ -210,5 +258,18 @@ public class TutorialManager : MonoBehaviour
         Action callback = onTutorialClosedCallback;
         onTutorialClosedCallback = null;
         callback?.Invoke();
+    }
+
+    public void GoToStartScene()
+    {
+        Time.timeScale = 1f;
+        IsTutorialActive = false;
+        activeSequence = null;
+        currentSteps.Clear();
+
+        if (!string.IsNullOrEmpty(startSceneName))
+        {
+            SceneManager.LoadScene(startSceneName);
+        }
     }
 }
