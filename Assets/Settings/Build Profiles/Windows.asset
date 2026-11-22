@@ -26,14 +26,14 @@ MonoBehaviour:
     m_path: Assets/Scenes/PantallaInicio.unity
     m_guid: 83e1b07ce3bf01245ac4aedd0229bb21
   - m_enabled: 1
-    m_path: Assets/Scenes/PantallaJuego.unity
-    m_guid: 8c9cfa26abfee488c85f1582747f6a02
+    m_path: Assets/Scenes/PantallaSeleccionNivel.unity
+    m_guid: 5a224882395f676438b64a4efd5ac967
   - m_enabled: 1
     m_path: Assets/Scenes/PantallaCreditos.unity
     m_guid: f97d6f65b3c3db14f9037af2c2a873b0
   - m_enabled: 1
-    m_path: Assets/Scenes/PruebasPepiur.unity
-    m_guid: 0f64746f4960815488071f860643975d
+    m_path: Assets/Scenes/Pruebas de niveles/Niveles.unity
+    m_guid: 787346489d2a1524e90995a73c2a8c2d
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
@@ -66,3 +66,23 @@ MonoBehaviour:
         m_CopyPDBFiles: 0
         m_WindowsDevicePortalAddress: 
         m_WindowsDevicePortalUsername: 
+--- !u!114 &6991409600002297702
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 15012, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: BuildAutomationSettings
+  m_EditorClassIdentifier: UnityEditor.dll::UnityEditor.Build.Profile.BuildAutomationSettings
+  m_OperatingSystemValue: 
+  m_OperatingSystemFamily: 
+  m_XcodeVersion: 
+  m_AndroidSdkVersion: 
+  m_UnityArchitecture: 
+  m_MachineTypeId: 
+  m_CredentialsId: 
+  m_BuildTarget: 19

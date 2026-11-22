@@ -59,7 +59,7 @@ public class CaptureAction : UnitAction
 
             if (WinManager.Instance != null)
             {
-                WinManager.Instance.CheckWinConditions(players);
+                WinManager.Instance.CheckWinConditions();
             }
         }
         unit.ExecuteWaitAction();

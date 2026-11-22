@@ -1,6 +1,7 @@
-using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using Pausa;
+using UnityEngine;
 
 public class MapCursor : MonoBehaviour
 {
@@ -228,6 +229,7 @@ public class MapCursor : MonoBehaviour
     private void ConfirmMovement()
     {
         if (activeUnit == null) return;
+        if (MenuPausa.Instance != null && MenuPausa.Instance.estaPausado) return;
 
         if (activeUnit.GetValidMoves().Contains(position))
         {

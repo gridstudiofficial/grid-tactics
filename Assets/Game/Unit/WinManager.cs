@@ -21,6 +21,8 @@ public class WinManager : MonoBehaviour
     public bool winByMajorityBuildings = true;
     public bool winByHeadquartersCapture = true;
 
+    public List<Player> activePlayers;
+
     private List<Building> allBuildings = new List<Building>();
     private List<Headquarters> allHQs = new List<Headquarters>();
 
@@ -48,7 +50,7 @@ public class WinManager : MonoBehaviour
         winByHeadquartersCapture = hqCapture;
     }
 
-    public void CheckWinConditions(List<Player> activePlayers)
+    public void CheckWinConditions()
     {
         if (activePlayers == null) return;
 

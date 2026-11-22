@@ -96,6 +96,7 @@ public class AIController : MonoBehaviour
             List<Unit> visibleEnemies = TurnManager.Instance.allUnits.Where(u => u.owner != aiPlayer).ToList();
 
             Vector2Int bestDestination = FindBestMovementTarget(unit, targetBuildings, visibleEnemies);
+            unit.CalculateValidMovesWithTerrain();
             List<Vector2Int> path = unit.FindPathTo(bestDestination);
 
             if (path.Count > 0)
@@ -112,12 +113,24 @@ public class AIController : MonoBehaviour
                     unit.position = step;
                 }
                 unit.position = path.Last();
+                unit.SetPendingFatigue(10 + (path.Count * 5));
                 unit.transform.position = new Vector3(unit.position.x, unit.position.y, 0f);
 
                 Building buildingAfterMove = FindObjectsOfType<Building>().FirstOrDefault(b => b.position == unit.position);
-                if (captureAction != null && buildingAfterMove != null && buildingAfterMove.owner != aiPlayer)
+
+                if (attackAction != null && attackAction.CanExecute(unit))
                 {
-                    unit.SetPendingFatigue(10 +(path.Count * 5));
+                    List<Unit> enemiesInRange = attackAction.FindEnemiesInRange(unit);
+                    if (enemiesInRange.Count > 0)
+                    {
+                        Unit target = enemiesInRange.OrderBy(e => e.currentHP).First();
+                        attackAction.PerformAttack(unit, target);
+                        yield return new WaitForSeconds(actionDelay);
+                        continue; // Pasa a evaluar la siguiente unidad de forma segura
+                    }
+                }
+                else if (captureAction != null && buildingAfterMove != null && buildingAfterMove.owner != aiPlayer)
+                {
                     captureAction.Execute(unit);
                 }
                 else
@@ -128,6 +141,7 @@ public class AIController : MonoBehaviour
             }
             else
             {
+                unit.SetPendingFatigue(15);
                 unit.ExecuteWaitAction();
             }
 

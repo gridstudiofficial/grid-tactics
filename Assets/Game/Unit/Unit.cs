@@ -94,7 +94,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
         List<Player> players = FindObjectsOfType<Building>().Select(b => b.owner).Where(o => o != null).Distinct().ToList();
         if (WinManager.Instance != null)
         {
-            WinManager.Instance.CheckWinConditions(players);
+            WinManager.Instance.CheckWinConditions();
         }
     }
 
@@ -279,7 +279,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
     }
 
     // --- CÁLCULO DE MOVIMIENTO RECONOCIENDO TERRENO ---
-    private void CalculateValidMovesWithTerrain()
+    public void CalculateValidMovesWithTerrain()
     {
         validMoves.Clear();
         Queue<Vector2Int> frontier = new Queue<Vector2Int>();
@@ -299,13 +299,24 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
             {
                 Vector2Int next = current + dir;
 
+                // Comprobar si hay otra unidad en la casilla 'next'
+                Unit occupyingUnit = GetOccupyingUnitAt(next);
+                bool isOccupiedByOtherUnit = occupyingUnit != null && occupyingUnit != this;
+                bool isOccupiedByEnemy = isOccupiedByOtherUnit && occupyingUnit.owner != this.owner;
+
+                // Las unidades enemigas bloquean el paso por esa casilla
+                if (isOccupiedByEnemy) continue;
+
                 // Verificar si el tipo de unidad puede pasar por este terreno
                 TerrainType terrain = MapTerrain.Instance != null ? MapTerrain.Instance.GetTerrainAt(next) : TerrainType.Plains;
                 bool canPass = MapTerrain.Instance == null || MapTerrain.Instance.CanUnitTypePassTerrain(movementType, terrain);
 
                 if (canPass)
                 {
-                    int newCost = costSoFar[current] + MapTerrain.Instance.GetMovementCostForType(movementType, terrain) ; // Coste 1 por casilla transitable
+                    int terrainCost = MapTerrain.Instance != null
+                        ? MapTerrain.Instance.GetMovementCostForType(movementType, terrain)
+                        : 1;
+                    int newCost = costSoFar[current] + terrainCost;
 
                     if (newCost <= movementRange)
                     {
@@ -313,12 +324,32 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
                         {
                             costSoFar[next] = newCost;
                             frontier.Enqueue(next);
-                            if (!validMoves.Contains(next)) validMoves.Add(next);
+
+                            // Solo se puede terminar el movimiento en casillas NO ocupadas por otra ficha
+                            if (!isOccupiedByOtherUnit && !validMoves.Contains(next))
+                            {
+                                validMoves.Add(next);
+                            }
                         }
                     }
                 }
             }
         }
+    }
+
+    private Unit GetOccupyingUnitAt(Vector2Int tilePos)
+    {
+        if (TurnManager.Instance == null || TurnManager.Instance.allUnits == null) return null;
+
+        foreach (var unit in TurnManager.Instance.allUnits)
+        {
+            if (unit != null && unit != this && unit.position == tilePos)
+            {
+                return unit;
+            }
+        }
+
+        return null;
     }
 
     public Vector2Int GetClosestValidPosition(Vector2Int clickedPos)
@@ -348,7 +379,18 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
 
     private List<Vector2Int> FindPath(Vector2Int start, Vector2Int target)
     {
-        if (MenuPausa.Instance.estaPausado) return new List<Vector2Int>();
+        if (MenuPausa.Instance != null && MenuPausa.Instance.estaPausado)
+        {
+            return new List<Vector2Int>();
+        }
+
+        // Evitar trazar ruta hacia una casilla ocupada por otra ficha (distinta a esta unidad)
+        Unit targetOccupant = GetOccupyingUnitAt(target);
+        if (targetOccupant != null && targetOccupant != this)
+        {
+            return new List<Vector2Int>();
+        }
+
         Queue<Vector2Int> queue = new Queue<Vector2Int>();
         Dictionary<Vector2Int, Vector2Int> cameFrom = new Dictionary<Vector2Int, Vector2Int>();
 
@@ -365,7 +407,7 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
             foreach (Vector2Int dir in directions)
             {
                 Vector2Int next = current + dir;
-                if (validMoves.Contains(next) && !cameFrom.ContainsKey(next))
+                if (!cameFrom.ContainsKey(next) && CanStepThroughForPath(next, target))
                 {
                     queue.Enqueue(next);
                     cameFrom[next] = current;
@@ -384,6 +426,27 @@ public abstract class Unit : MonoBehaviour, IHealable, IPositioned, ISchedulable
         }
         path.Reverse();
         return path;
+    }
+
+    private bool CanStepThroughForPath(Vector2Int tile, Vector2Int target)
+    {
+        Unit occupant = GetOccupyingUnitAt(tile);
+        bool occupiedByOther = occupant != null && occupant != this;
+
+        // Nunca se puede terminar en una casilla ocupada por otra ficha
+        if (tile == target && occupiedByOther) return false;
+
+        // Si es una casilla válida de destino, se puede transitar
+        if (validMoves.Contains(tile)) return true;
+
+        // Si es una casilla intermedia aliada (no destino final), permitimos cruzarla si el terreno lo permite
+        if (occupiedByOther && occupant.owner == this.owner)
+        {
+            TerrainType terrain = MapTerrain.Instance != null ? MapTerrain.Instance.GetTerrainAt(tile) : TerrainType.Plains;
+            return MapTerrain.Instance == null || MapTerrain.Instance.CanUnitTypePassTerrain(movementType, terrain);
+        }
+
+        return false;
     }
 
     protected virtual void ShowMovementRange()
