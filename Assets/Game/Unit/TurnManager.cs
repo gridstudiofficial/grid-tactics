@@ -20,6 +20,11 @@ public class TurnManager : MonoBehaviour
     public System.Action<Unit> OnActiveUnitChanged;
     public System.Action<List<Unit>> OnQueueUpdated;
 
+    // Añade esta lista y método en tu TurnManager:
+    public List<Factory> allFactories = new List<Factory>();
+
+    public List<City> allCities = new List<City>();
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -32,6 +37,18 @@ public class TurnManager : MonoBehaviour
         // En tu juego real, llamarás a esto tras colocar las fichas
         //StartNextBatchOrReduce();
     }
+    public void RegisterCity(City city)
+    {
+        if (!allCities.Contains(city))
+        {
+            allCities.Add(city);
+        }
+    }
+
+    public void RegisterFactory(Factory factory)
+    {
+        if (!allFactories.Contains(factory)) { allFactories.Add(factory); OnActiveUnitChanged?.Invoke(null); }
+    }
 
     public void RegisterUnit(Unit unit)
     {
@@ -41,21 +58,30 @@ public class TurnManager : MonoBehaviour
 
     public void StartNextBatchOrReduce()
     {
-        activeUnits  = allUnits.Where(u => u.fatigue <= 0 && !u.hasActedThisRound).ToList();
+        activeUnits = allUnits.Where(u => u.fatigue <= 0 && !u.hasActedThisRound).ToList();
 
         if (activeUnits.Count == 0)
         {
             anyUnitReady = false;
-            // Nadie tiene fatiga 0. Reducir fatiga globalmente hasta que aparezca el próximo lote
             while (!anyUnitReady)
             {
                 foreach (var unit in allUnits)
                 {
                     unit.ReduceFatigue(1);
                 }
+                foreach (var factory in allFactories) // <-- Reducir fatiga de las fábricas
+                {
+                    factory.ReduceFatigue(1);
+                }
+                foreach (var city in allCities)
+                {
+                    if (city != null)
+                    {
+                        city.ReduceFatigue(1);
+                    }
+                }
             }
 
-            // Reiniciar el estado de acción para el nuevo ciclo
             foreach (var unit in allUnits)
             {
                 unit.hasActedThisRound = false;
@@ -69,10 +95,17 @@ public class TurnManager : MonoBehaviour
 
     public void SelectNextUnit()
     {
-        
         if (activeUnits.Count > 0)
         {
             activePlayer = activeUnits.First().owner;
+
+            // COMPROBACIÓN DE IA: Si el jugador activo es la IA, delegamos el turno al AIController
+            if (AIController.Instance != null && AIController.Instance.aiPlayer == activePlayer)
+            {
+                AIController.Instance.StartAITurn(activePlayer);
+                return; // Detenemos la selección manual de unidades humanas
+            }
+
             currentActiveUnit = activeUnits.First();
             currentActiveUnit.StartTurn();
 
@@ -86,7 +119,6 @@ public class TurnManager : MonoBehaviour
             StartNextBatchOrReduce();
         }
     }
-
 
 
     // Se llama cuando la unidad termina de moverse o atacar

@@ -22,6 +22,10 @@ public class TurnUI : MonoBehaviour
             TurnManager.Instance.OnActiveUnitChanged += UpdateActiveUnitUI;
             TurnManager.Instance.OnQueueUpdated += UpdateQueueUI;
         }
+        activeUnitPanel.SetActive(false); // Ocultar el panel de ficha activa al inicio
+        activeUnitSprite.gameObject.SetActive(false); // Ocultar el sprite de ficha activa al inicio
+        activeUnitFatigueText.gameObject.SetActive(false); // Ocultar el texto de fatiga al inicio
+        activeUnitNameText.gameObject.SetActive(false); // Ocultar el texto de nombre al inicio
     }
 
     private void OnDestroy()
@@ -42,6 +46,9 @@ public class TurnUI : MonoBehaviour
         }
 
         activeUnitPanel.SetActive(true);
+        activeUnitSprite.gameObject.SetActive(true);
+        activeUnitFatigueText.gameObject.SetActive(true);
+        activeUnitNameText.gameObject.SetActive(true);
         activeUnitNameText.text = $"{activeUnit.id}";
         activeUnitFatigueText.text = $"{activeUnit.fatigue}";
 
@@ -73,7 +80,7 @@ public class TurnUI : MonoBehaviour
                 TextMeshProUGUI label = item.GetComponentInChildren<TextMeshProUGUI>();
                 if (label != null)
                 {
-                    label.text = $"{unit.id}    {unit.fatigue}";
+                    label.text = $"{unit.id}: {unit.fatigue}";
                 }
                 if(sr != null)
                 {

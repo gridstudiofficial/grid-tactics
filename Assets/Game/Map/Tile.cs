@@ -13,13 +13,6 @@ public enum TileBaseType
 /// <summary>
 /// Tipos de terreno que puede tener una casilla.
 /// </summary>
-public enum TerrainType
-{
-    Grass,
-    Water,
-    Sand,
-    Mountain
-}
 
 /// <summary>
 /// Representa una casilla del mapa.

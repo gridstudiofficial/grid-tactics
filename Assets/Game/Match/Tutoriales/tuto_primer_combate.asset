@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d6370e5bcfb7e34795c78d56dc3eb65, type: 3}
+  m_Name: tuto_primer_combate
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialSequence
+  tutorialId: tut_primer_combate
+  moment: 1
+  pauseGameWhileOpen: 1
+  showOnlyOnce: 1
+  steps:
+  - speakerOrTitle: "soldado n\xBA 42070"
+    message: Bien, has encontrado una zona de entrenamiento, puedes pegar sin problemas al objetivo de practicas
+  - speakerOrTitle: "soldado n\xBA 42070"
+    message: Por desgracia solo cuento con ataques cuerpo a cuerpo, asegurate de estar en una posicion cardinal para que pueda atacar, recuerda mi ataque no sirve en diagonal
+  - speakerOrTitle: "soldado n\xBA 42070"
+    message: "Cuando te canses de mandarme golpear al objetivo como un maniaco, dirigete a las monta\xF1as, tenemos informaci\xF3n de que el cuartel general de tu enemigo se encuentra alli"

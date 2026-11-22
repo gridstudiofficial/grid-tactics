@@ -9,6 +9,11 @@ public class CambioEscena : MonoBehaviour
         SceneManager.LoadScene(nombreEscena);
     }
 
+    public void CargarSelectorNiveles()
+    {
+        SceneManager.LoadScene(1);
+    }
+
     public void Salir()
     {
         Console.WriteLine("Saliendo del juego");

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d6370e5bcfb7e34795c78d56dc3eb65, type: 3}
+  m_Name: Tuto_primera_ciudad
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialSequence
+  tutorialId: Tuto_primera_ciudad
+  moment: 1
+  pauseGameWhileOpen: 1
+  showOnlyOnce: 1
+  steps:
+  - speakerOrTitle: "Soldado n\xBA 42069"
+    message: Has conquistado tu primera ciudad, este es el inicio de una bella conquista
+  - speakerOrTitle: "Soldado n\xBA 42069"
+    message: 'Con esto recibiras una cuantiosa cantidad de dinero '
+  - speakerOrTitle: "Soldado n\xBA 42069"
+    message: "Cada 3 ciclos de turnos completos la ciudad generar\xE1 ingresos extra, ten cuidado de que no te la roben. "
+  - speakerOrTitle: "Soldado n\xBA 42069"
+    message: "Tras la conquista de la ciudad, necesitamos una fabrica para que nunca te falte carne de ca\xF1on que luchara por ti mientras te tomas tu cafe en tu lounge presidencial"
+  - speakerOrTitle: "Soldado n\xBA 42069"
+    message: Hemos oido que hay una cerca del gran lago a la izquerda, aprisa jefe
