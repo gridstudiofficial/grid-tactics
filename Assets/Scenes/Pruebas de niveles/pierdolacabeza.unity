@@ -4100,7 +4100,7 @@ PrefabInstance:
       objectReference: {fileID: 885134650}
     - target: {fileID: 7636515890111301543, guid: 6254da0bbc2eebf43aca957aa849bb37, type: 3}
       propertyPath: <fatigue>k__BackingField
-      value: 1
+      value: 10000000
       objectReference: {fileID: 0}
     - target: {fileID: 7636515890111301543, guid: 6254da0bbc2eebf43aca957aa849bb37, type: 3}
       propertyPath: <position>k__BackingField.x
@@ -4325,14 +4325,10 @@ MonoBehaviour:
   nextButton: {fileID: 1347639442}
   finishButton: {fileID: 425031197}
   startTutorials:
-  - {fileID: 11400000, guid: c9d3ed14ec7bf2e49b6ae36355bc7240, type: 2}
-  midBattleTutorials:
-  - {fileID: 11400000, guid: 39fa8b3c41dc78c4f92d800d80c537c0, type: 2}
-  - {fileID: 11400000, guid: c5e982686d3952c419824ca6ac9fe105, type: 2}
+  - {fileID: 11400000, guid: f7e0486539db7b84e8c74e86586e6811, type: 2}
+  midBattleTutorials: []
   endBattleTutorials:
-  - {fileID: 11400000, guid: 7611d28b54bbe8841b1380a87ad2ea23, type: 2}
   - {fileID: 11400000, guid: 0dab784f3d7e6ee4fbe0fce34cbd1ccf, type: 2}
-  - {fileID: 11400000, guid: d4a918d792577764dbbbca4a5b989ba7, type: 2}
 --- !u!4 &763016651
 Transform:
   m_ObjectHideFlags: 0
@@ -6543,37 +6539,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1555053849}
   m_CullTransparentMesh: 1
---- !u!1 &1627599318
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1627599319}
-  m_Layer: 0
-  m_Name: Building
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1627599319
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1627599318}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.80993, y: 0.68504, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1635275676
 GameObject:
   m_ObjectHideFlags: 0
@@ -14124,7 +14089,6 @@ SceneRoots:
   - {fileID: 2106554924}
   - {fileID: 353081403}
   - {fileID: 723692402}
-  - {fileID: 1627599319}
   - {fileID: 763016651}
   - {fileID: 2492310489207244243}
   - {fileID: 1052617041}
