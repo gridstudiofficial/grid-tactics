@@ -34,6 +34,12 @@ MonoBehaviour:
   - m_enabled: 1
     m_path: Assets/Scenes/Pruebas de niveles/Niveles.unity
     m_guid: 787346489d2a1524e90995a73c2a8c2d
+  - m_enabled: 1
+    m_path: Assets/Scenes/Pruebas de niveles/Tutorial 3.unity
+    m_guid: 6dcc5c0922265714e89f03860f70d429
+  - m_enabled: 1
+    m_path: Assets/Scenes/Pruebas de niveles/pierdolacabeza.unity
+    m_guid: 0b06afce172bfb4409b6336855b756b3
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
